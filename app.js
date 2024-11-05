@@ -1,46 +1,87 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const connectDB = require('./config/db');
-const userRoutes = require('./routes/userRoutes');
-const examRoutes = require('./routes/examRoutes');
-const verifyRoutes = require('./routes/verifyRoutes');
-const channelRoutes = require('./routes/activeChannelRoutes');
-const {initSocket} = require('./controllers/examController');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const cors = require('cors'); // Import cors
+// server.js
+const express = require("express");
+const http = require("http");
+const connectDB = require("./config/db");
+const userRoutes = require("./routes/userRoutes");
+const examRoutes = require("./routes/examRoutes");
+const verifyRoutes = require("./routes/verifyRoutes");
+const level3Routes = require("./routes/level3Routes");
+const channelRoutes = require("./routes/activeChannelRoutes");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+const cors = require("cors");
+const { initializeSocket, emitMessage } = require("./utils/socketSetup"); // Import socket functions
+const { uploadLevel2Images } = require("./utils/uploadImage");
 
-const {uploadLevel2Images} = require('./utils/uploadImage');
+const app = express();
+const server = http.createServer(app);
 
-const dir = './level2AQuestions';
+// Initialize database connection
+connectDB();
+
+// Middleware and configurations
+app.use(cors());
+app.use(express.json());
+
+// Initialize WebSocket server
+initializeSocket(server);
+
+// File storage and upload configurations
+const dir = "./level2AQuestions";
+const userProfile = "./userImages";
 if (!fs.existsSync(dir)) {
   fs.mkdirSync(dir);
 }
+if (!fs.existsSync(userProfile)) {
+  fs.mkdirSync(userProfile);
+}
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, dir);
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}_${file.originalname}`); // Add timestamp to filename
+    cb(null, `${Date.now()}_${file.originalname}`);
   },
 });
-const upload = multer({storage});
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
 
-connectDB();
-initSocket(io);
+const storage1 = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, userProfile);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}_${file.originalname}`);
+  },
+});
 
-app.use(cors());
-app.use(express.json());
+const upload = multer({ storage });
+const upload1 = multer({ storage: storage1 });
 
-app.use('/api/users', userRoutes);
-app.use('/api/exam', examRoutes);
-app.use('/api/verify', verifyRoutes);
-app.use('/api/channel', channelRoutes);
-app.post('/upload/level2AImages', upload.single('file'), uploadLevel2Images);
+// Routes
+app.use("/api/users", userRoutes);
+app.use("/api/exam", examRoutes);
+app.use("/api/verify", verifyRoutes);
+app.use("/api/channel", channelRoutes);
+app.use("/api/level3", level3Routes);
 
-module.exports = app;
+app.post("/upload/level2AImages", upload.single("file"), uploadLevel2Images);
+app.post("/upload/userProfile", (req, res) => {
+  upload1.single("file")(req, res, (err) => {
+    if (err) {
+      console.error("Multer error:", err);
+      return res.status(500).json({ message: "File upload failed", error: err.message });
+    }
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    res.status(200).json({ message: "User profile image uploaded successfully", file: req.file });
+  });
+});
+
+// Start the server
+server.listen(3000, () => {
+  console.log("listening on *:3000");
+});
+
+module.exports = { app, emitMessage }; // Export emitMessage for use elsewhere

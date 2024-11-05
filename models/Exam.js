@@ -6,6 +6,8 @@ const examSchema = new mongoose.Schema({
   attempts: Number,
   timeTaken: Number,
   mistakes: Number,
+  marks: Number,
+  scorePercentage: Number,
   status: { type: String, enum: ['pass', 'fail'] },
   round: { type: String }
 });

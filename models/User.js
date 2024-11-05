@@ -2,14 +2,13 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   traineeName: String,
-  DOJ: Date,
+  DOJ: {type: Date, default: new Date()},
   mobileNo: {type: String, unique: true},
   email: String,
   qualification: String,
   branch: String,
   designationGrade: {
     type: String,
-    enum: ['Apprentice', 'STTs', 'NEEM', 'LEAD'],
   },
   collegeName: String,
   yearOfPassOut: String,
@@ -18,6 +17,12 @@ const userSchema = new mongoose.Schema({
   verified: {type: Boolean, default: false},
   verifiedBy: String,
   userImage: String,
+  nextSession: {
+    type: Object,
+  },
+  nameOfWorkingLine: String,
+  NameOfSupervisor: String,
+  PhoneNumberOfSuperVisor: String,
 });
 
 module.exports = mongoose.model('User', userSchema);

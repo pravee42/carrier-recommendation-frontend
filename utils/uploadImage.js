@@ -19,4 +19,15 @@ const uploadLevel2Images = async (req, res) => {
   }
 };
 
-module.exports = {uploadLevel2Images};
+const uploadUserProfileImage = (req, res) => {
+  try {
+    // Handle the uploaded user profile image
+    res.status(200).json({ message: "User profile image uploaded successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to upload user profile image.", error });
+  }
+};
+
+
+
+module.exports = {uploadLevel2Images, uploadUserProfileImage};

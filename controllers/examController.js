@@ -2,66 +2,63 @@ const Exam = require('../models/Exam');
 const activeChannel = require('../models/activeChannel');
 const Settings = require('../models/Settings');
 
-// Socket.IO instance (passed from the main server file)
-let io;
-const initSocket = (socketIoInstance) => {
-  io = socketIoInstance;
-};
-
 const createMCQSettings = async (req, res) => {
   try {
     const settings = await Settings.findOneAndUpdate(
-      {}, 
-      { level1PassPercent: req.body.level1PassPercent },
-      { upsert: true, new: true }
+      {},
+      {level1PassPercent: req.body.level1PassPercent},
+      {upsert: true, new: true},
     );
     res.status(200).json(settings);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({message: error.message});
   }
 };
 
 const createExamResult = async (req, res) => {
-  const { userId, level, round, timeTaken, mistakes, status } = req.body;
+  const {userId, level, round, timeTaken, mistakes, status} = req.body;
 
   try {
     // Only apply the round progression check if level is 2 or higher
     if (level >= 2) {
       const roundOrder = ['A', 'B', 'C'];
       const currentRoundIndex = roundOrder.indexOf(round);
-      
+
       if (currentRoundIndex > 0) {
         const previousRound = roundOrder[currentRoundIndex - 1];
-        
+
         const previousExam = await Exam.findOne({
           userId,
           level,
           round: previousRound,
-          status: 'pass'
+          status: 'pass',
         });
 
         if (!previousExam) {
           return res.status(400).json({
-            message: `You must pass round ${previousRound} before attempting round ${round} at level ${level}.`
+            message: `You must pass round ${previousRound} before attempting round ${round} at level ${level}.`,
           });
         }
       }
     }
 
-    // Check if an entry already exists for the same user, level, and round
-    const existingExamResult = await Exam.findOne({ userId, level, round });
+    // Find all attempts for the same user, level, and round
+    const userAttempts = await Exam.find({userId, level, round}).sort({
+      createdAt: 1,
+    });
 
     let examResult;
-    if (existingExamResult) {
-      // If the record exists, increment the attempts and update the other fields
-      existingExamResult.attempts += 1;
-      existingExamResult.timeTaken = timeTaken;
-      existingExamResult.mistakes = mistakes;
-      existingExamResult.status = status;
+    if (userAttempts.length >= 5) {
+      // If there are 5 attempts, overwrite the oldest attempt (first item in sorted list)
+      const oldestAttempt = userAttempts[userAttempts.length-1];
+      oldestAttempt.timeTaken = timeTaken;
+      oldestAttempt.mistakes = mistakes;
+      oldestAttempt.status = status;
+      oldestAttempt.attempts += 1; // Increment the attempts count
 
-      examResult = await existingExamResult.save();
+      examResult = await oldestAttempt.save();
     } else {
-      // If no existing record, create a new exam result
+      // If less than 5 attempts, create a new exam result
       examResult = await new Exam({
         userId,
         level,
@@ -73,26 +70,16 @@ const createExamResult = async (req, res) => {
       }).save();
     }
 
-    // Find the device name for the user
-    const userDevice = await activeChannel.findOne({ userId });
-    if (!userDevice) {
-      return res.status(404).json({ message: 'Device not found for the user.' });
+    const deviceToUpdate = await activeChannel.find({userId})
+
+    if (deviceToUpdate) {
+      emitMessage(deviceToUpdate.device, examResult);
     }
-    const deviceName = userDevice.deviceName;
 
-    // Emit the message to the specific device's channel
-    io.to(deviceName).emit('examUpdate', {
-      message: `Exam result updated for userId ${userId}`,
-      data: examResult
-    });
-
-    res.status(existingExamResult ? 200 : 201).json(examResult);
+    res.status(userAttempts.length >= 5 ? 200 : 201).json(examResult);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({message: error.message});
   }
 };
 
-
-
-
-module.exports = { createMCQSettings, createExamResult, initSocket };
+module.exports = {createMCQSettings, createExamResult};
