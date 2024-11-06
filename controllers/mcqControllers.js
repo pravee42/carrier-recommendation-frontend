@@ -142,7 +142,7 @@ const submitMCQResultController = async (req, res) => {
 const GetQuestionsController = async (req, res) => {
   try {
     // Find all questions and exclude the correctAnswer field
-    const data = await MCQ.findOne({}, {'questions.correctAnswer': 0});
+    const data = await MCQ.findOne({});
 
     res.status(200).json(data);
   } catch (error) {

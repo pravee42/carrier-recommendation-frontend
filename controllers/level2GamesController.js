@@ -119,21 +119,18 @@ const submitLevel2AResultController = async (req, res) => {
 };
 
 const GetQuestionsLevel2AController = async (req, res) => {
-  const {userId} = req.body;
-  const UserData = await User.findById(userId);
-  const nameOfWorkingLine = UserData.nameOfWorkingLine;
-  console.log(UserData, userId);
+  const {type} = req.body;
   try {
     // Find all questions and exclude the correctAnswer field
     const data = await level2A.find(
-      {workingLine: nameOfWorkingLine},
-      {'questions.correctAnswer': 0},
+      {workingLine: type},
     );
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({message: error.message});
   }
 };
+
 
 const calibrateMultipleCameras = async (req, res) => {
   const updates = req.body; // Expecting an array of { modelName, cameraUrl }
@@ -195,6 +192,32 @@ const getTutorialSection = async (req, res) => {
   }
 };
 
+const getLevel2CompletedUsers = async (req, res) => {
+  try {
+    const qualifiedExams = await Exam.find({
+      level: 2,
+      round: 'D',
+      status: 'pass'
+    }).populate({
+      path: 'userId',
+      model: User,
+      select: 'traineeName DOJ mobileNo qualification branch designationGrade fingerprint verified verifiedBy userImage nameOfWorkingLine', 
+    });
+
+    const users = qualifiedExams.map(exam => exam.userId);
+
+    res.status(200).json({
+      message: 'Qualified users retrieved successfully',
+      data: users,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error fetching qualified users',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   Getlevel2GamesController,
   addLevel2AQuestionsController,
@@ -204,4 +227,5 @@ module.exports = {
   calibrateMultipleCameras,
   addTutorialSection,
   getTutorialSection,
+  getLevel2CompletedUsers
 };

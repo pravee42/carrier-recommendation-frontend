@@ -4,7 +4,7 @@ const socketIo = require('socket.io');
 let io;
 
 const initializeSocket = server => {
-  const io = socketIo(server, {
+  io = socketIo(server, {
     cors: {
       origin: "*", // Allow all origins (bypass CORS)
       methods: ["GET", "POST"], // Allow specific methods
