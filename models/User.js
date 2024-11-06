@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
   },
   nameOfWorkingLine: String,
   NameOfSupervisor: String,
+  supervisorId: String,
   PhoneNumberOfSuperVisor: String,
 });
 

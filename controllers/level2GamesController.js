@@ -93,10 +93,19 @@ const submitLevel2AResultController = async (req, res) => {
       round: 'A',
       attempts: 1,
       timeTaken,
-      marks:correctAnswers,
+      marks: correctAnswers,
       scorePercentage,
-      status: passed,
+      status: passed ? 'pass' : 'fail',
     }).save();
+
+    await activeChannel.findOneAndUpdate(
+      {device: device},
+      {
+        userId: userId,
+        status: 'ended',
+      },
+      {new: true, upsert: true},
+    );
 
     res.status(200).json({
       passed,

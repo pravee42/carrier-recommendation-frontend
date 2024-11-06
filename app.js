@@ -7,6 +7,7 @@ const examRoutes = require("./routes/examRoutes");
 const verifyRoutes = require("./routes/verifyRoutes");
 const level3Routes = require("./routes/level3Routes");
 const channelRoutes = require("./routes/activeChannelRoutes");
+const superVisorRoutes = require("./routes/supervisorRoutes");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -64,6 +65,7 @@ app.use("/api/exam", examRoutes);
 app.use("/api/verify", verifyRoutes);
 app.use("/api/channel", channelRoutes);
 app.use("/api/level3", level3Routes);
+app.use("/api/supervisor", superVisorRoutes);
 
 app.post("/upload/level2AImages", upload.single("file"), uploadLevel2Images);
 app.post("/upload/userProfile", (req, res) => {

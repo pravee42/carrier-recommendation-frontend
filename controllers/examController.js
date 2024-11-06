@@ -18,6 +18,10 @@ const createMCQSettings = async (req, res) => {
 const createExamResult = async (req, res) => {
   const {userId, level, round, timeTaken, mistakes, status} = req.body;
 
+  console.log(req.body)
+
+  console.log("dsnkjfnkjfnkjfndjkfjksfnkjnfjsnfkjsdnf")
+
   try {
     // Only apply the round progression check if level is 2 or higher
     if (level >= 2) {
@@ -75,6 +79,15 @@ const createExamResult = async (req, res) => {
     if (deviceToUpdate) {
       emitMessage(deviceToUpdate.device, examResult);
     }
+
+    await activeChannel.findOneAndUpdate(
+      {device: deviceToUpdate},
+      {
+        userId: userId,
+        status: 'ended',
+      },
+      {new: true, upsert: true},
+    );
 
     res.status(userAttempts.length >= 5 ? 200 : 201).json(examResult);
   } catch (error) {

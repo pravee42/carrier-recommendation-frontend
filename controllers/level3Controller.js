@@ -1,4 +1,8 @@
 const Level3 = require('../models/level3');
+const SuperVisor = require('../models/Supervisor');
+const User = require('../models/User');
+const { sendMailToSuperVisor } = require('../utils/mail');
+
 
 exports.addLevel3 = async (req, res) => {
   const { assignieId, userId } = req.params;
@@ -55,4 +59,38 @@ exports.updateLevel3 = async (req, res) => {
   }
 };
 
+exports.bulkUpdateSupervisors = async (req, res) => {
+  const { users } = req.body;
 
+  if (!Array.isArray(users) || users.length === 0) {
+    return res.status(400).json({ message: 'Invalid data format or empty user list.' });
+  }
+
+  try {
+    const updatePromises = users.map(async ({ userId, NameOfSupervisor, supervisorId }) => {
+      const user = await User.findById(userId);
+
+      if (user) {
+        user.NameOfSupervisor = NameOfSupervisor;
+        user.supervisorId = supervisorId;
+
+        await user.save();
+
+        // Fetch supervisor email
+        const supervisor = await SuperVisor.findById(supervisorId);
+        
+        if (supervisor && supervisor.email) {
+          // Send email to the supervisor
+          await sendMailToSuperVisor(supervisor.email, userId, supervisorId, user.traineeName);
+        }
+      }
+    });
+
+    await Promise.all(updatePromises);
+
+    res.status(200).json({ message: 'Bulk update successful and emails sent to supervisors.' });
+  } catch (error) {
+    console.error('Error in bulk update:', error);
+    res.status(500).json({ message: 'Bulk update failed', error: error.message });
+  }
+};

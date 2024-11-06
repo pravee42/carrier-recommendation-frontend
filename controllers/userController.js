@@ -161,8 +161,26 @@ const validateUser = async (req, res) => {
       {new: true},
     );
 
+    // console.log(user)
+
+    const getActiveDevice = await activeChannel.findOne({device: deviceToUpdate})
+    
+    if (!getActiveDevice ) {
+      await activeChannel.findOneAndUpdate(
+        {device: deviceToUpdate},
+        {
+          userId: user._id,
+          lastConnectedTime: new Date(),
+          status: 'assigned',
+        },
+        {new: true, upsert: true},
+      );
+    }
+
+    
+
     // Update active channel
-    if (deviceToUpdate) {
+    if (deviceToUpdate && getActiveDevice?.status === "ended") {
       await activeChannel.findOneAndUpdate(
         {device: deviceToUpdate},
         {
@@ -191,7 +209,7 @@ const validateUser = async (req, res) => {
         userResponse.attendWriting = true
       }
 
-      console.log(userResponse.nextSession.round)
+      // console.log(userResponse.nextSession.round)
 
       const tutorial = await level2.findOne({round: userResponse.nextSession.round});
 
@@ -202,6 +220,10 @@ const validateUser = async (req, res) => {
 
       if (deviceToUpdate) {
         emitMessage(deviceToUpdate, userResponse);
+      }
+
+      if(user._id === getActiveDevice.userId && getActiveDevice?.status !== "ended") {
+        return res.status(500).json({message: 'Authentication successful', error: 'Queue is Full! Please Come Back Later', userData: userResponse});
       }
 
       return res.status(200).json({

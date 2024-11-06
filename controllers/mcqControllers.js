@@ -66,6 +66,7 @@ const validateMCQController = async (req, res) => {
 };
 
 const submitMCQResultController = async (req, res) => {
+  console.log("djhdf")
   try {
     const {userId, device, answers} = req.body;
 
@@ -112,9 +113,18 @@ const submitMCQResultController = async (req, res) => {
       attempts: 1,
       timeTaken,
       marks:earnedMarks,
-      status: passed,
+      status: passed ? "pass" : "fail",
       scorePercentage
     }).save();
+
+    await activeChannel.findOneAndUpdate(
+      {device: device},
+      {
+        userId: userId,
+        status: 'ended',
+      },
+      {new: true, upsert: true},
+    );
 
     res.status(200).json({
       passed,
@@ -124,6 +134,7 @@ const submitMCQResultController = async (req, res) => {
       timeTaken,
     });
   } catch (error) {
+    console.log(error.message)
     res.status(500).json({message: error.message});
   }
 };

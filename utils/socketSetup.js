@@ -20,7 +20,7 @@ const initializeSocket = server => {
 
 // Function to emit messages to a specific channel
 const emitMessage = (channel, message) => {
-  console.log(`Emitting message to channel ${channel}:`, message);
+//   console.log(`Emitting message to channel ${channel}:`, message);
   if (io) {
     io.emit(channel, message);
   }

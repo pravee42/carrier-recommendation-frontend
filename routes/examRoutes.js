@@ -5,10 +5,10 @@ const { addLevel2AQuestionsController, submitLevel2AResultController, GetQuestio
 
 const router = express.Router();
 
-router.post('/settings/mcq', createMCQSettings);
-router.post('/settings/mcq/add', addMCQQuestionsController);
+router.post('/mcq', createMCQSettings);
+router.post('/mcq/add', addMCQQuestionsController);
 router.get('/mcq/get-questions', GetQuestionsController);
-router.post('/settings/mcq/validate', submitMCQResultController);
+router.post('/mcq/validate', submitMCQResultController);
 router.post('/exam/result', createExamResult);
 router.post('/level2/a/add', addLevel2AQuestionsController)
 router.post('/level2/add-tutorial', addTutorialSection)
