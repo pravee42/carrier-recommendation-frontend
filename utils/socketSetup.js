@@ -1,10 +1,17 @@
 // socket.js
-const {Server} = require('socket.io');
+const socketIo = require('socket.io');
 
 let io;
 
 const initializeSocket = server => {
-  io = new Server(server);
+  const io = socketIo(server, {
+    cors: {
+      origin: "*", // Allow all origins (bypass CORS)
+      methods: ["GET", "POST"], // Allow specific methods
+      allowedHeaders: ["Content-Type"], // Allow specific headers
+      credentials: true // Enable credentials (cookies, sessions)
+    }
+  });
 
   io.on('connection', socket => {
     console.log('A user connected');
