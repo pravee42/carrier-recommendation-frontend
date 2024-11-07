@@ -25,7 +25,7 @@ const createExamResult = async (req, res) => {
   try {
     // Only apply the round progression check if level is 2 or higher
     if (level >= 2) {
-      const roundOrder = ['A', 'B', 'C'];
+      const roundOrder = ['B', 'C', 'D'];
       const currentRoundIndex = roundOrder.indexOf(round);
 
       if (currentRoundIndex > 0) {

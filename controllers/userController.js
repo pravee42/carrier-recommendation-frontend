@@ -10,12 +10,14 @@ const Exam = require('../models/Exam');
 const {emitMessage} = require('../utils/socketSetup');
 
 const Level2Games = require('../models/level2Games');
+const { generateUserScheduleHtml } = require('../utils/generateUserScheduleHtml');
 
 const createUser = async (req, res) => {
   try {
     const user = new User(req.body);
 
     const DOJ = dayjs(new Date());
+    
     const schedules = [];
     for (let i = 1; i <= 3; i++) {
       let scheduleDate = DOJ.add(i, 'day');
@@ -35,29 +37,7 @@ const createUser = async (req, res) => {
 
     // Generate PDF
     const pdfFilePath = path.join('userTimeTables', `${user._id}.pdf`);
-    const htmlContent = `
-      <h1>User Time Table</h1>
-      <table border="1">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${schedules
-            .map(
-              schedule => `
-            <tr>
-              <td>${schedule.scheduleDate.toISOString().slice(0, 10)}</td>
-              <td>08:30 - 12:30</td>
-            </tr>
-          `,
-            )
-            .join('')}
-        </tbody>
-      </table>
-    `;
+    const htmlContent = generateUserScheduleHtml();
 
     pdf.create(htmlContent, {}).toFile(pdfFilePath, err => {
       if (err) {
