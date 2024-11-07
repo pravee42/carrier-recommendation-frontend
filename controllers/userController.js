@@ -17,7 +17,7 @@ const createUser = async (req, res) => {
     const user = new User(req.body);
 
     const DOJ = dayjs(new Date());
-    
+
     const schedules = [];
     for (let i = 1; i <= 3; i++) {
       let scheduleDate = DOJ.add(i, 'day');
@@ -76,7 +76,7 @@ const validateUser = async (req, res) => {
     };
 
     const response = await axios.post(
-      'http://192.168.0.109:5000/match',
+      `${process.env.CENTERAL_SERVER}/match`,
       matchPayload,
     );
     const data = response.data.MatchingScore > 100;

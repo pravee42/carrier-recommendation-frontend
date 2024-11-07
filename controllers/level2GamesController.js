@@ -9,9 +9,9 @@ const Getlevel2GamesController = async (req, res) => {
   try {
     const data = await level2Games.find();
     const videoFeeds = [
-      'http://192.168.0.120:8790/0/video_feed',
-      'http://192.168.0.120:8790/1/video_feed',
-      'http://192.168.0.120:8790/2/video_feed',
+      `${SATHISH_VIDEO_API}/8790/0/video_feed`,
+      `${SATHISH_VIDEO_API}/8790/1/video_feed`,
+      `${SATHISH_VIDEO_API}/8790/2/video_feed`,
     ];
 
     res.status(200).json({ModelsData: data, videoFeeds: videoFeeds});

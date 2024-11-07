@@ -4,6 +4,9 @@ const level2A = require('../models/Level2A');
 const MCQ = require('../models/mcq');
 const User = require('../models/User');
 
+
+const SATHISH_API = process.env.SATHISH_API_KEY
+
 const SetActiveChannel = async (req, res) => {
   try {
     const {userId, device, level, round} = req.body;
@@ -77,25 +80,25 @@ const SetActiveChannel = async (req, res) => {
         }
       } else if (round === 'B') {
         const start = await axios.get(
-          `http://192.168.0.113:8790/0/start_game?userId=${userId}`,
+          `${SATHISH_API}/0/start_game?userId=${userId}`,
         );
         return res
           .status(200)
-          .send({video: 'http://192.168.0.113:8790/0/video_feed'}); // Add 'return'
+          .send({video: '${SATHISH_API}/0/video_feed'}); // Add 'return'
       } else if (round === 'C') {
         const start = await axios.get(
-          `http://192.168.0.113:8790/1/start_game?userId=${userId}`,
+          `${SATHISH_API}/1/start_game?userId=${userId}`,
         );
         return res
           .status(200)
-          .send({video: 'http://192.168.0.113:8790/1/video_feed'}); // Add 'return'
+          .send({video: '${SATHISH_API}/1/video_feed'}); // Add 'return'
       } else if (round === 'D') {
         const start = await axios.get(
-          `http://192.168.0.113:8790/2/start_game?userId=${userId}`,
+          `${SATHISH_API}/2/start_game?userId=${userId}`,
         );
         return res
           .status(200)
-          .send({video: 'http://192.168.0.113:8790/2/video_feed'}); // Add 'return'
+          .send({video: '${SATHISH_API}/2/video_feed'}); // Add 'return'
       }
     }
 

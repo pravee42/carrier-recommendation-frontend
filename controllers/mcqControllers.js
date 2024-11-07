@@ -1,6 +1,9 @@
 
 const Exam = require('../models/Exam');
 const MCQ = require('../models/mcq');
+const axios = require('axios')
+const { PDFDocument, rgb } = require('pdf-lib');
+
 const activeChannel = require('../models/activeChannel'); // Assumed model for active channels
 
 // Controller to add or update MCQ questions
