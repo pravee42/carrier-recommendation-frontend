@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {createOrUpdateSettings, getSettings, deleteSettings} = require('../controllers/settingsController');
+const {createOrUpdateSettings, getSettings, deleteSettings} = require('../controllers/settingsControllers');
 
 // Create or Update Settings
 router.post('/settings', createOrUpdateSettings);
