@@ -1,21 +1,24 @@
 const uploadLevel2Images = async (req, res) => {
   try {
-    // Access the file information through req.file
     if (!req.file) {
-      return res.status(400).json({message: 'No file uploaded'});
+      return res.status(400).json({ message: "No file uploaded" });
     }
 
+    // Correctly generate public URL
+    const fileUrl = `/level2AQuestions/${req.file.filename}`;
+   console.log('file',fileUrl);
+   
     res.status(200).json({
-      message: 'File uploaded successfully',
+      message: "File uploaded successfully",
       file: {
         filename: req.file.filename,
-        path: req.file.path,
+        url: fileUrl, // Correct public URL
         size: req.file.size,
       },
     });
   } catch (error) {
-    console.error('Error uploading file:', error);
-    res.status(500).json({message: 'Internal Server Error'});
+    console.error("Error uploading file:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
