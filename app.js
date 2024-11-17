@@ -14,6 +14,7 @@ const fs = require("fs");
 const cors = require("cors");
 const { initializeSocket, emitMessage } = require("./utils/socketSetup"); // Import socket functions
 const { uploadLevel2Images } = require("./utils/uploadImage");
+const operatorObservation = require("./routes/operatorObservationRoutes")
 
 const app = express();
 const server = http.createServer(app);
@@ -65,6 +66,7 @@ app.use("/api/exam", examRoutes);
 app.use("/api/verify", verifyRoutes);
 app.use("/api/channel", channelRoutes);
 app.use("/api/level3", level3Routes);
+app.use("/api/level3b", operatorObservation);
 app.use("/api/supervisor", superVisorRoutes);
 
 app.post("/upload/level2AImages", upload.single("file"), uploadLevel2Images);

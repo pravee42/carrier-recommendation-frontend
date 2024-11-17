@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/set-active-channel', SetActiveChannel);
 router.get('/get-models-details', Getlevel2GamesController);
 router.post('/video-calibration', calibrateMultipleCameras);
-router.post('/video-calibration', getCalibratedDatas);
+router.get('/video-calibration', getCalibratedDatas);
 router.post('/set-models-details', addLevel2Models);
 
 module.exports = router;
