@@ -72,3 +72,4 @@ exports.deleteSupervisor = async (req, res) => {
     res.status(500).json({ message: 'Error deleting supervisor', error: error.message });
   }
 };
+

@@ -122,6 +122,21 @@ const mailTemplate = (userId, sId, tranieeName) => {
 </html>`;
 };
 
+const mailTemplate1 = (userId, traineeName) => {
+    return `
+      <html>
+        <body>
+          <h1>Welcome 🙏</h1>
+          <p>A new User has been added to the training process.</p>
+          <p>Please verify the details and approve the user for further process.</p>
+          <p><strong>Trainee Name:</strong> ${traineeName}</p>
+          <p><a href="http://yourapplicationurl.com/approve-user/${userId}">Approve the user</a></p>
+        </body>
+      </html>
+    `;
+  };
+  
+
 const sendMailToSuperVisor = async (mailId, userId, sId, tranieeName) => {
   await transporter.sendMail({
     from: 'info.ridemap@gmail.com',
@@ -131,4 +146,20 @@ const sendMailToSuperVisor = async (mailId, userId, sId, tranieeName) => {
   });
 };
 
-module.exports = {sendMailToSuperVisor};
+const sendMailToTrainer = async (traineeEmail, userId, traineeName) => {
+    try {
+      const mailOptions = {
+        from: 'info.ridemap@gmail.com',
+        to: traineeEmail,
+        subject: 'New Assignment: Trainee Supervision',
+        html: mailTemplate(userId, traineeName),
+      };
+      
+      await transporter.sendMail(mailOptions);
+      console.log('Email sent successfully to trainer');
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  };
+
+module.exports = {sendMailToSuperVisor, sendMailToTrainer};

@@ -6,9 +6,10 @@ const {default: axios} = require('axios');
 const activeChannel = require('../models/activeChannel');
 const Exam = require('../models/Exam');
 const {emitMessage} = require('../utils/socketSetup');
-
+const {sendMailToTrainer} = require("../utils/mail")
 const Level2Games = require('../models/level2Games');
 const { generateUserScheduleHtml } = require('../utils/generateUserScheduleHtml');
+const Settings = require('../models/Settings');
 
 function getNextFiveDaysExcludingSunday() {
   const days = [];
@@ -31,6 +32,14 @@ const createUser = async (req, res) => {
     const user = new User(req.body);
     await user.save();
 
+    const settings = await Settings.findOne();  
+    if (!settings || !settings.trainerEmail) {
+      return res.status(500).json({ message: 'Trainer email not found in settings' });
+    }
+
+    const traineeEmail = settings.trainerEmail;
+    const traineeName = user.name; 
+
     // Generate PDF
     const pdfFilePath = path.join('userTimeTables', `${user._id}.pdf`);
     const nextFiveDays = getNextFiveDaysExcludingSunday();
@@ -43,6 +52,8 @@ const createUser = async (req, res) => {
       } else {
         const userResponse = user.toObject();
         delete userResponse.fingerprint;
+
+        sendMailToTrainer(traineeEmail, user._id, traineeName); 
 
         axios.post("http://127.0.0.1:5000/print", {
           file: `${user._id}.pdf`
