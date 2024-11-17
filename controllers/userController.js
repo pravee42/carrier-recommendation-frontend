@@ -1,29 +1,28 @@
 const User = require('../models/User');
 const path = require('path');
 const pdf = require('html-pdf');
-const level2 = require('../models/Level2')
+const level2 = require('../models/Level2');
 const {default: axios} = require('axios');
 const activeChannel = require('../models/activeChannel');
 const Exam = require('../models/Exam');
 const {emitMessage} = require('../utils/socketSetup');
-const {sendMailToTrainer} = require("../utils/mail")
+const {sendMailToTrainer} = require('../utils/mail');
 const Level2Games = require('../models/level2Games');
-const { generateUserScheduleHtml } = require('../utils/generateUserScheduleHtml');
+const {generateUserScheduleHtml} = require('../utils/generateUserScheduleHtml');
 const Settings = require('../models/Settings');
+const html_to_pdf = require('html-pdf-node');
+
 
 function getNextFiveDaysExcludingSunday() {
   const days = [];
   let currentDate = new Date();
 
   while (days.length < 5) {
-    currentDate.setDate(currentDate.getDate() + 1);
-
-    // Check if it's not Sunday (0 = Sunday)
     if (currentDate.getDay() !== 0) {
-      days.push(new Date(currentDate).toISOString().slice(0,10));
+      days.push(new Date(currentDate).toISOString().slice(0, 10));
     }
+    currentDate.setDate(currentDate.getDate() + 1);
   }
-
   return days;
 }
 
@@ -32,43 +31,93 @@ const createUser = async (req, res) => {
     const user = new User(req.body);
     await user.save();
 
-    const settings = await Settings.findOne();  
+    const settings = await Settings.findOne();
     if (!settings || !settings.trainerEmail) {
-      return res.status(500).json({ message: 'Trainer email not found in settings' });
+      return res
+        .status(500)
+        .json({message: 'Trainer email not found in settings'});
     }
 
     const traineeEmail = settings.trainerEmail;
-    const traineeName = user.name; 
+    const traineeName = user.name;
 
     // Generate PDF
     const pdfFilePath = path.join('userTimeTables', `${user._id}.pdf`);
     const nextFiveDays = getNextFiveDaysExcludingSunday();
-    const htmlContent = generateUserScheduleHtml(nextFiveDays[0], nextFiveDays[1], nextFiveDays[2], nextFiveDays[3], nextFiveDays[4], nextFiveDays[5]);
+    let options = {format: 'A4'};
+    const htmlContent = [{url: generateUserScheduleHtml(
+      nextFiveDays[0],
+      nextFiveDays[1],
+      nextFiveDays[2],
+      nextFiveDays[3],
+      nextFiveDays[4],
+      nextFiveDays[5],
+    ), nname:  `${user._id}.pdf`}];
 
-    pdf.create(htmlContent, {}).toFile(pdfFilePath, err => {
-      if (err) {
-        console.error('Error generating PDF:', err);
-        res.status(500).json({ message: 'Error generating PDF' });
-      } else {
-        const userResponse = user.toObject();
-        delete userResponse.fingerprint;
+    html_to_pdf.generatePdf(htmlContent, options).then(pdfBuffer => {
+      const userResponse = user.toObject();
+      delete userResponse.fingerprint;
 
-        sendMailToTrainer(traineeEmail, user._id, traineeName); 
+      sendMailToTrainer(traineeEmail, user._id, traineeName);
 
-        axios.post("http://127.0.0.1:5000/print", {
-          file: `${user._id}.pdf`
-        })
-
-        res.status(201).json({
+      try {
+        axios.post('http://127.0.0.1:5000/print', {
+          file: `${user._id}.pdf`,
+        });
+      } catch (err) {
+        console.log('error', err.message);
+        res.status(500).json({
+          message: 'Error Printing Pdf',
           user: userResponse,
-          pdfUrl: `${req.protocol}://${req.get('host')}/userTimeTables/${user._id}.pdf`,
+          pdfUrl: `${req.protocol}://${req.get('host')}/userTimeTables/${
+            user._id
+          }.pdf`,
         });
       }
+
+      res.status(201).json({
+        user: userResponse,
+        pdfUrl: `${req.protocol}://${req.get('host')}/userTimeTables/${
+          user._id
+        }.pdf`,
+      });
     });
 
+    // pdf.create(htmlContent, {}).toFile(pdfFilePath, err => {
+    //   if (err) {
+    //     console.error('Error generating PDF:', err);
+    //     res.status(500).json({message: 'Error generating PDF'});
+    //   } else {
+    //     const userResponse = user.toObject();
+    //     delete userResponse.fingerprint;
 
+    //     sendMailToTrainer(traineeEmail, user._id, traineeName);
+
+    //     try {
+    //       axios.post('http://127.0.0.1:5000/print', {
+    //         file: `${user._id}.pdf`,
+    //       });
+    //     } catch (err) {
+    //       console.log('error', err.message);
+    //       res.status(500).json({
+    //         message: 'Error Printing Pdf',
+    //         user: userResponse,
+    //         pdfUrl: `${req.protocol}://${req.get('host')}/userTimeTables/${
+    //           user._id
+    //         }.pdf`,
+    //       });
+    //     }
+
+    //     res.status(201).json({
+    //       user: userResponse,
+    //       pdfUrl: `${req.protocol}://${req.get('host')}/userTimeTables/${
+    //         user._id
+    //       }.pdf`,
+    //     });
+    //   }
+    // });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({message: error.message});
   }
 };
 
@@ -113,7 +162,7 @@ const validateUser = async (req, res) => {
         level: 1,
         model: `A`,
         round: 'A',
-        device: deviceMapping['A'][0]
+        device: deviceMapping['A'][0],
       };
       deviceToUpdate = `A_${deviceMapping['A'][0]}`;
     } else if (lastData.level === 1) {
@@ -155,9 +204,11 @@ const validateUser = async (req, res) => {
 
     // console.log(user)
 
-    const getActiveDevice = await activeChannel.findOne({device: deviceToUpdate})
-    
-    if (!getActiveDevice ) {
+    const getActiveDevice = await activeChannel.findOne({
+      device: deviceToUpdate,
+    });
+
+    if (!getActiveDevice) {
       await activeChannel.findOneAndUpdate(
         {device: deviceToUpdate},
         {
@@ -168,11 +219,9 @@ const validateUser = async (req, res) => {
         {new: true, upsert: true},
       );
     }
-
-    
 
     // Update active channel
-    if (deviceToUpdate && getActiveDevice?.status === "ended") {
+    if (deviceToUpdate && getActiveDevice?.status === 'ended') {
       await activeChannel.findOneAndUpdate(
         {device: deviceToUpdate},
         {
@@ -184,7 +233,6 @@ const validateUser = async (req, res) => {
       );
     }
 
-    
     if (data) {
       // Convert to plain object and remove sensitive data
       const userResponse = user.toObject();
@@ -193,29 +241,37 @@ const validateUser = async (req, res) => {
       // Ensure nextSession is included in response
       userResponse.nextSession = nextSession;
 
-
-      if(userResponse.nextSession.level === 1) {
-        userResponse.attendMCQ = true
-      }
-      else if((userResponse.nextSession.level === 2 && userResponse.nextSession.round === 'A')) {
-        userResponse.attendWriting = true
+      if (userResponse.nextSession.level === 1) {
+        userResponse.attendMCQ = true;
+      } else if (
+        userResponse.nextSession.level === 2 &&
+        userResponse.nextSession.round === 'A'
+      ) {
+        userResponse.attendWriting = true;
       }
 
       // console.log(userResponse.nextSession.round)
 
-      const tutorial = await level2.findOne({round: userResponse.nextSession.round});
+      const tutorial = await level2.findOne({
+        round: userResponse.nextSession.round,
+      });
 
       userResponse.nextSession.tutorialVideo = tutorial.tutorialVideo;
       userResponse.nextSession.tutorialImages = tutorial.tutorialImages;
-
-
 
       if (deviceToUpdate) {
         emitMessage(deviceToUpdate, userResponse);
       }
 
-      if(user._id === getActiveDevice.userId && getActiveDevice?.status !== "ended") {
-        return res.status(500).json({message: 'Authentication successful', error: 'Queue is Full! Please Come Back Later', userData: userResponse});
+      if (
+        user._id === getActiveDevice.userId &&
+        getActiveDevice?.status !== 'ended'
+      ) {
+        return res.status(500).json({
+          message: 'Authentication successful',
+          error: 'Queue is Full! Please Come Back Later',
+          userData: userResponse,
+        });
       }
 
       return res.status(200).json({

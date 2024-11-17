@@ -4,7 +4,6 @@ const http = require("http");
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
 const examRoutes = require("./routes/examRoutes");
-const verifyRoutes = require("./routes/verifyRoutes");
 const level3Routes = require("./routes/level3Routes");
 const channelRoutes = require("./routes/activeChannelRoutes");
 const superVisorRoutes = require("./routes/supervisorRoutes");
@@ -67,7 +66,7 @@ const upload1 = multer({ storage: storage1 });
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/exam", examRoutes);
-app.use("/api/verify", verifyRoutes);
+// app.use("/api/verify", verifyRoutes);
 app.use("/api/channel", channelRoutes);
 app.use("/api/level3", level3Routes);
 app.use("/api/level3b", operatorObservation);
