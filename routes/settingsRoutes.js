@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const settingsController = require('../controllers/settingsController');
+const {createOrUpdateSettings, getSettings, deleteSettings} = require('../controllers/settingsController');
 
 // Create or Update Settings
-router.post('/settings', settingsController.createOrUpdateSettings);
+router.post('/settings', createOrUpdateSettings);
 
 // Get Settings
-router.get('/settings', settingsController.getSettings);
+router.get('/settings', getSettings);
 
 // Delete Settings
-router.delete('/settings', settingsController.deleteSettings);
+router.delete('/settings', deleteSettings);
 
 module.exports = router;
