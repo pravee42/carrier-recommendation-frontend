@@ -9,6 +9,25 @@ exports.addLevel3 = async (req, res) => {
   const { processName, processNumber, level3CycleTime, level3Memory } = req.body;
 
   try {
+    // Check if a Level3 entry with the same processName and processNumber exists for the user
+    const existingLevel3 = await Level3.findOne({ userId, processName, processNumber });
+
+    if (existingLevel3) {
+      // If found, update the existing Level3 entry
+      existingLevel3.level3CycleTime = level3CycleTime;
+      existingLevel3.level3Memory = level3Memory;
+      await existingLevel3.save();
+
+      return res.status(200).json({ message: 'Level3 data updated successfully', data: existingLevel3 });
+    }
+
+    // If no matching Level3 entry is found, check the total count for this user
+    const level3Count = await Level3.countDocuments({ userId });
+    if (level3Count >= 5) {
+      return res.status(400).json({ message: 'User has reached the maximum limit of 5 Level3 entries.' });
+    }
+
+    // Create a new Level3 entry if the limit has not been reached
     const newLevel3 = new Level3({
       userId,
       assignieId,
@@ -25,11 +44,12 @@ exports.addLevel3 = async (req, res) => {
   }
 };
 
+
 exports.getLevel3 = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const level3 = await Level3.findById(id);
+    const level3 = await Level3.find({userId: id});
     if (!level3) {
       return res.status(404).json({ message: 'Level3 data not found' });
     }

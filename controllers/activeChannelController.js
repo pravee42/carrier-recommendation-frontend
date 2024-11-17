@@ -49,7 +49,7 @@ const SetActiveChannel = async (req, res) => {
         try {
           const questionsData = await level2A.findOne(
             {workingLine: nameOfWorkingLine},
-            {questions: 1},
+            {questions: 1, timeToComplete: 1},
           );
 
           if (!questionsData) {
@@ -67,10 +67,12 @@ const SetActiveChannel = async (req, res) => {
 
           const shuffledAnswers = allAnswers.sort(() => Math.random() - 0.5);
 
-          res.status(200).json({
+          return res.status(200).json({
             questions,
             shuffledAnswers,
             level: 2,
+            timeToComplete,
+            nameOfWorkingLine,
             round: 'A'
           });
 

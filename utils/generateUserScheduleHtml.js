@@ -1,159 +1,206 @@
-const generateUserScheduleHtml = () => `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Training Schedule</title>
-  <style>
-    /* Container styling */
-    .container {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
-    }
-    .header {
-      text-align: center;
-      font-weight: bold;
-    }
-    .header h1 {
-      font-size: 24px;
-    }
-    .header h3, .header h5 {
-      font-size: 18px;
-      margin-top: 8px;
-      text-transform: uppercase;
-    }
-    /* Table styling */
-    table {
-      width: 100%;
-      background-color: white;
-      border-collapse: collapse;
-      border: 2px solid black;
-      margin-top: 20px;
-    }
-    th, td {
-      padding: 8px;
-      border: 2px solid black;
-      text-align: center;
-    }
-    th {
-      background-color: #e5e5e5;
-    }
-    .topic-list {
-      text-align: left;
-      margin-top: 8px;
-    }
-    .topic-list p {
-      border-top: 2px solid black;
-      padding: 4px 0;
-      margin: 0;
-    }
-    .footer {
-      padding: 10px;
-      border: 2px solid black;
-      text-align: center;
-      margin-top: 20px;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <div class="header">
-    <h1>LUCAS - TVS TRAINING CENTRE, TVK, PONDICHERRY</h1>
-    <h3>INDUCTION SCHEDULE FOR TRAINEES</h3>
-    <h5>Syllabus I</h5>
+const generateUserScheduleHtml = (day1, day2, day3, day4, day5) => `<div class="container" style="max-width: 1200px; margin: 2rem auto; padding: 1rem;">
+  <div class="flex flex-col" style="font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
+    <h1 style="font-size: 1.5rem;">LUCAS - TVS TRAINING CENTRE, TVK, PONDICHERRY</h1>
+    <h3 style="font-size: 1.25rem; font-weight: 600; text-align: center; text-transform: uppercase;">INDUCTION SCHEDULE FOR TRAINEES</h3>
+    <h5 style="font-weight: 600; margin-bottom: 1rem; text-align: center; text-transform: uppercase;">Syllabus I</h5>
   </div>
-
-  <table id="scheduleTable">
+  <table style="width: 100%; background-color: white; border: 2px solid black;">
     <thead>
-      <tr>
-        <th>S.NO</th>
-        <th>Subject</th>
-        <th>Faculty</th>
-        <th>Date</th>
-        <th>Time</th>
+      <tr style="background-color: #E5E5E5;">
+        <th style="padding: 0.5rem; border: 2px solid black;">S.NO</th>
+        <th style="padding: 0.5rem; border: 2px solid black;">Subject</th>
+        <th style="padding: 0.5rem; border: 2px solid black;">Faculty</th>
+        <th style="padding: 0.5rem; border: 2px solid black;">Date</th>
+        <th style="padding: 0.5rem; border: 2px solid black;">Time</th>
       </tr>
     </thead>
-    <tbody id="scheduleTableBody"></tbody>
-  </table>
-
-  <div class="footer">SKILL LEVEL2 PRACTICAL</div>
-
-  <table id="skillLevel2Table">
-    <thead>
-      <tr>
-        <th>S.NO</th>
-        <th>Subject</th>
-        <th>Faculty</th>
-        <th>Date</th>
-        <th>Time</th>
-      </tr>
-    </thead>
-    <tbody id="skillLevel2TableBody"></tbody>
-  </table>
-</div>
-
-<script>
-  // Function to generate dates excluding Sundays
-  function generateDatesExcludingSundays(count) {
-    const dates = [];
-    let today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    while (dates.length < count) {
-      if (today.getDay() !== 0) {
-        const day = String(today.getDate()).padStart(2, '0');
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const year = String(today.getFullYear()).slice(2);
-        dates.push(${day}-${month}-${year});
-      }
-      today.setDate(today.getDate() + 1);
-    }
-    return dates;
-  }
-
-  // Populate the training schedule tables
-  const dates = generateDatesExcludingSundays(10);
-  const scheduleData = [
-    { id: 1, subject: "HR Joining Formalities, Corporate Responsibility Policies", faculty: "HR Head, Team Members", date: dates[0], time: "08:30 am to 12:30 pm", topics: ["Understanding of PF, ESI, Salary Structure, CCA, allotment.", "Understanding of Time Office - Function, Leave Policy, Final Settlement System.", "Understanding of welfare system (ID Card, Safety Shoes, Uniform, Snacks coupon/barcode).", "HR Discipline Adherence of Proper - Tucking, Uniform, Shoes, Dress code, etc.", "Understanding of HR Canteen - Function & Discipline.", "Understanding of HR Medical Function & Medical formalities.", "Basic Awareness on First Aid, Health and hygienic Related Training."] },
-    { id: 2, subject: "Induction scheduled for new trainees", faculty: "HR Training Incharge & Team Members", date: dates[0], time: "01:00 pm to 05:00 pm", topics: ["About company, TVK culture & Understanding of HR Training Function.", "Awareness on SOP & Covid-19 SOP.", "Awareness on Basic Discipline (Time management, communication, team work)."] },
-    // Additional rows omitted for brevity
-  ];
-  const a2 = [
-    { id: 9, subject: "Skill Level-2 Practical / On the Job Training", faculty: "HR-Training Incharge/HR Line Captain & Team Members", date: dates[2], time: "08:30 am to 12:30 pm", topics: ["Dexterity Training - Memory Exercises - Switch & Wiper.", "Dexterity Training - Segregation of color ball.", "Dexterity Training - Assemble & Disassemble.", "Understanding of Cycle Time Achievement Exercises - Eye & Two Hand Coordination Exercises.", "Understanding of Assembly Sequences & Orientation.", "Understanding of Wiper Motors & Switch Working Principles through videos."] },
-    { id: 10, subject: "Practical Training on PDI Station & Safety", faculty: "HR-Training Incharge/HR Line Captain & Team Members", date: dates[3], time: "01:00 pm to 05:30 pm", topics: ["Understanding of PDI Station in wiper & switch.", "Understanding of Exploded view - Switch & wiper.", "Understanding of Assembly Sequence & Process Flow in Switch & Wiper.", "Practical Training on Poison case test / Defects Identification.", "Practical Training on Instruments & Gauges - Basic Level.", "Practical Training on PPEs.", "Understanding of Fire Safety - Exploded View."] }
-  ];
-
-  function populateTable(data, tableBodyId) {
-    const tableBody = document.getElementById(tableBodyId);
-    data.forEach((item, index) => {
-      const row = document.createElement('tr');
-      row.innerHTML = 
-        <td>${index + 1}</td>
-        <td>
-          <p class="font-semibold">${item.subject}</p>
-          <div class="topic-list">
-            ${item.topics.map(topic => `<p>${topic}</p>`).join('')}
+    <tbody>
+      <tr style="border: 2px solid black;">
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">1</td>
+        <td style="padding: 0.5rem; border: 2px solid black;">
+          <p style="font-weight: 600;">HR Joining Formalities, Corporate Responsibility Policies</p>
+          <div style="margin-top: 0.5rem; color: #4A4A4A;">
+            <p style="border-top: 2px solid black;">Understanding of PF, ESI, Salary Structure, CCA, allotment.</p>
+            <p style="border-top: 2px solid black;">Understanding of Time Office - Function, Leave Policy, Final Settlement System.</p>
+            <p style="border-top: 2px solid black;">Understanding of welfare system (ID Card, Safety Shoes, Uniform, Snacks coupon/barcode).</p>
+            <p style="border-top: 2px solid black;">HR Discipline Adherence of Proper - Tucking, Uniform, Shoes, Dress code, etc.</p>
+            <p style="border-top: 2px solid black;">Understanding of HR Canteen - Function &amp; Discipline.</p>
+            <p style="border-top: 2px solid black;">Understanding of HR Medical Function &amp; Medical formalities.</p>
+            <p style="border-top: 2px solid black;">Basic Awareness on First Aid, Health and hygienic Related Training.</p>
           </div>
         </td>
-        <td>${item.faculty}</td>
-        <td>${item.date}</td>
-        <td>${item.time}</td>
-      ;
-      tableBody.appendChild(row);
-    });
-  }
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">HR Head, Team Members</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">${day1}</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">08:30 am to 12:30 pm</td>
+      </tr>
+      <tr style="border: 2px solid black;">
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">2</td>
+        <td style="padding: 0.5rem; border: 2px solid black;">
+          <p style="font-weight: 600;">Induction scheduled for new trainees</p>
+          <div style="margin-top: 0.5rem; color: #4A4A4A;">
+            <p style="border-top: 2px solid black;">About company, TVK culture &amp; Understanding of HR Training Function.</p>
+            <p style="border-top: 2px solid black;">Awareness on SOP &amp; Covid-19 SOP.</p>
+            <p style="border-top: 2px solid black;">Awareness on Basic Discipline (Time management, communication, team work).</p>
+          </div>
+        </td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">HR Training Incharge &amp; Team Members</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">${day1}</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">01:00 pm to 05:00 pm</td>
+      </tr>
+      <tr style="border: 2px solid black;">
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">3</td>
+        <td style="padding: 0.5rem; border: 2px solid black;">
+          <p style="font-weight: 600;">HR Security Discipline, Emergency Points &amp; Contact Number</p>
+          <div style="margin-top: 0.5rem; color: #4A4A4A;">
+            <p style="border-top: 2px solid black;">Fire Safety theory and practical training/precautions.</p>
+            <p style="border-top: 2px solid black;">Dos and Don'ts During Mock Drill, Emergency Situation.</p>
+          </div>
+        </td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">HR Security Officers &amp; Team Members</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">${day2}</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">08:30 am to 09:30 am</td>
+      </tr>
+      <tr style="border: 2px solid black;">
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">4</td>
+        <td style="padding: 0.5rem; border: 2px solid black;">
+          <p style="font-weight: 600;">Quality Function/Activities</p>
+          <div style="margin-top: 0.5rem; color: #4A4A4A;">
+            <p style="border-top: 2px solid black;">Understanding of Quality Policy/Management System.</p>
+            <p style="border-top: 2px solid black;">Understanding of Control Plan, SOP, Process &amp; Product Knowledge.</p>
+            <p style="border-top: 2px solid black;">Understanding of NG Parts/Abnormalities &amp; Fallen Parts Handling.</p>
+            <p style="border-top: 2px solid black;">Understanding of Poka Yoke, First Off/Last Off Verification/Concepts.</p>
+          </div>
+        </td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">Quality Head &amp; Team Members</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">${day2}</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">09:30 am to 11:30 am</td>
+      </tr>
+      <tr style="border: 2px solid black;">
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">5</td>
+        <td style="padding: 0.5rem; border: 2px solid black;">
+          <p style="font-weight: 600;">CSR Customer Specific Requirements</p>
+          <div style="margin-top: 0.5rem; color: #4A4A4A;">
+            <p style="border-top: 2px solid black;">Instruments Handling - Basic Level, Understanding of Attribute vs. Variable Instruments.</p>
+            <p style="border-top: 2px solid black;">Understanding of Calibration &amp; Due Date updation procedure of instruments.</p>
+            <p style="border-top: 2px solid black;">Understanding of procedure: instruments Replacement in case of damage/Drop Gauge of its on shop floor.</p>
+          </div>
+        </td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">Standards Room Head &amp; Team Members</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">${day2}</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">11:30 am to 12:30 pm</td>
+      </tr>
+      <tr style="border: 2px solid black;">
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">6</td>
+        <td style="padding: 0.5rem; border: 2px solid black;">
+          <p style="font-weight: 600;">Basic Industrial Safety &amp; PPE's Training, MSDS</p>
+          <div style="margin-top: 0.5rem; color: #4A4A4A;">
+            <p style="border-top: 2px solid black;">SHE/ESG Policy/Awareness.</p>
+            <p style="border-top: 2px solid black;">Understanding of breakdown raising procedure &amp; WED Function.</p>
+            <p style="border-top: 2px solid black;">Machine Safety/OCP/Work Place Safety, Electrical safety.</p>
+          </div>
+        </td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">Safety Head &amp; Team Members</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">${day2}</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">01:00 pm to 02:00 pm</td>
+      </tr>
+      <tr style="border: 2px solid black;">
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">7</td>
+        <td style="padding: 0.5rem; border: 2px solid black;">
+          <p style="font-weight: 600;">Methods Function, Tool Handling &amp; Changeover</p>
+          <div style="margin-top: 0.5rem; color: #4A4A4A;">
+            <p style="border-top: 2px solid black;">Understanding of Methods Function, Handling of Tool Related/Process Related - Safety &amp; Quality Training.</p>
+            <p style="border-top: 2px solid black;">Understanding of tools, JIGS, &amp; fixture, Tool life monitoring.</p>
+            <p style="border-top: 2px solid black;">Understanding of setting changeover and procedure.</p>
+            <p style="border-top: 2px solid black;">Understanding of tool related losses &amp; recording in log book.</p>
+          </div>
+        </td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">Methods Head &amp; Tool Head</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">${day2}</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">03:00 pm to 04:00 pm</td>
+      </tr>
+      <tr style="border: 2px solid black;">
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">8</td>
+        <td style="padding: 0.5rem; border: 2px solid black;">
+          <p style="font-weight: 600;">Review of Knowledge through Examination</p>
+          <div style="margin-top: 0.5rem; color: #4A4A4A;">
+            <p style="border-top: 2px solid black;">Review the knowledge through the examination.</p>
+            <p style="border-top: 2px solid black;">Evaluation Status updation.</p>
+          </div>
+        </td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">HR-Training Incharge &amp; Team Members</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">${day2}</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">04:00 pm to 05:00 pm</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="width: 100%; border-bottom: 2px solid black; display: flex; align-items: center; justify-content: center;">SKILL LEVEL2 PRACTICAL</p>
+  <table style="width: 100%; background-color: white; border: 2px solid black;">
+    <thead>
+      <tr style="background-color: #E5E5E5;">
+        <th style="padding: 0.5rem; border: 2px solid black;">S.NO</th>
+        <th style="padding: 0.5rem; border: 2px solid black;">Subject</th>
+        <th style="padding: 0.5rem; border: 2px solid black;">Faculty</th>
+        <th style="padding: 0.5rem; border: 2px solid black;">Date</th>
+        <th style="padding: 0.5rem; border: 2px solid black;">Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border: 2px solid black;">
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">1</td>
+        <td style="padding: 0.5rem; border: 2px solid black;">
+          <p style="font-weight: 600;">Skill Level-2 Practical / On the Job Training</p>
+          <div style="margin-top: 0.5rem; color: #4A4A4A;">
+            <p style="border-top: 2px solid black;">Dexterity Training - Memory Exercises - Switch &amp; Wiper.</p>
+            <p style="border-top: 2px solid black;">Dexterity Training - Segregation of color ball.</p>
+            <p style="border-top: 2px solid black;">Dexterity Training - Assemble &amp; Disassemble.</p>
+            <p style="border-top: 2px solid black;">Understanding of Cycle Time Achievement Exercises - Eye &amp; Two Hand Coordination Exercises.</p>
+            <p style="border-top: 2px solid black;">Understanding of Assembly Sequences &amp; Orientation.</p>
+            <p style="border-top: 2px solid black;">Understanding of Wiper Motors &amp; Switch Working Principles through videos.</p>
+          </div>
+        </td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">HR-Training Incharge/HR Line Captain &amp; Team Members</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">${day3}</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">08:30 am to 12:30 pm</td>
+      </tr>
+      <tr style="border: 2px solid black;">
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">2</td>
+        <td style="padding: 0.5rem; border: 2px solid black;">
+          <p style="font-weight: 600;">Practical Training on PDI Station &amp; Safety</p>
+          <div style="margin-top: 0.5rem; color: #4A4A4A;">
+            <p style="border-top: 2px solid black;">Understanding of PDI Station in wiper &amp; switch.</p>
+            <p style="border-top: 2px solid black;">Understanding of Exploded view - Switch &amp; wiper.</p>
+            <p style="border-top: 2px solid black;">Understanding of Assembly Sequence &amp; Process Flow in Switch &amp; Wiper.</p>
+            <p style="border-top: 2px solid black;">Practical Training on Poison case test / Defects Identification.</p>
+            <p style="border-top: 2px solid black;">Practical Training on Instruments &amp; Gauges - Basic Level.</p>
+            <p style="border-top: 2px solid black;">Practical Training on PPEs.</p>
+            <p style="border-top: 2px solid black;">Understanding of Fire Safety - Exploded View.</p>
+          </div>
+        </td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">HR-Training Incharge/HR Line Captain &amp; Team Members</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">${day4}</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">01:00 pm to 05:30 pm</td>
+      </tr>
+      <tr style="border: 2px solid black;">
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">3</td>
+        <td style="padding: 0.5rem; border: 2px solid black;">
+          <p style="font-weight: 600;">Production Function Activities &amp; Safety</p>
+          <div style="margin-top: 0.5rem; color: #4A4A4A;">
+            <p style="border-top: 2px solid black;">Understanding of Production - Function/Activities.</p>
+            <p style="border-top: 2px solid black;">Practical Training on Control Plan, SOP, JI Training.</p>
+            <p style="border-top: 2px solid black;">Practical Training: production related documents updation (log book, 4m updation sheet, producer maintenance check sheet, process audit check sheet, hourly output monitoring sheet, Setting Change over check sheet).</p>
+            <p style="border-top: 2px solid black;">Practical Training on Quality - First Off/Last Off, Poka-Yoke Verification/Updation, NG Parts Handling, Identification &amp; Traceability.</p>
+            <p style="border-top: 2px solid black;">Practical Training on Dock Audit, Tags Identification/Systems.</p>
+            <p style="border-top: 2px solid black;">Practical Training on Safety Checking &amp; 5S cleaning procedures.</p>
+            <p style="border-top: 2px solid black;">Review the Skill &amp; knowledge through the examination.</p>
+            <p style="border-top: 2px solid black;">Evaluation Status updation.</p>
+          </div>
+        </td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">Production Head / Supervisors / Quality Team &amp; Team Members</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">${day5}</td>
+        <td style="padding: 0.5rem; border: 2px solid black; text-align: center;">24 Hrs / 3 Mandays</td>
+      </tr>
+    </tbody>
+  </table>
+</div>`
 
-  populateTable(scheduleData, "scheduleTableBody");
-  populateTable(a2, "skillLevel2TableBody");
-</script>
-
-</body>
-</html>
-
-`;
-
-module.exports = {generateUserScheduleHtml};
+module.exports = {generateUserScheduleHtml}

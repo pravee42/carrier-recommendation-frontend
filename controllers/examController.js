@@ -95,4 +95,6 @@ const createExamResult = async (req, res) => {
   }
 };
 
+
+
 module.exports = {createMCQSettings, createExamResult};

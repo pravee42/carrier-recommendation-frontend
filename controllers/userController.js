@@ -12,51 +12,54 @@ const {emitMessage} = require('../utils/socketSetup');
 const Level2Games = require('../models/level2Games');
 const { generateUserScheduleHtml } = require('../utils/generateUserScheduleHtml');
 
+function getNextFiveDaysExcludingSunday() {
+  const days = [];
+  let currentDate = new Date();
+
+  while (days.length < 5) {
+    currentDate.setDate(currentDate.getDate() + 1);
+
+    // Check if it's not Sunday (0 = Sunday)
+    if (currentDate.getDay() !== 0) {
+      days.push(new Date(currentDate).toISOString().slice(0,10));
+    }
+  }
+
+  return days;
+}
+
 const createUser = async (req, res) => {
   try {
     const user = new User(req.body);
-
-    const DOJ = dayjs(new Date());
-
-    const schedules = [];
-    for (let i = 1; i <= 3; i++) {
-      let scheduleDate = DOJ.add(i, 'day');
-      if (scheduleDate.day() === 0) {
-        scheduleDate = scheduleDate.add(1, 'day');
-      }
-      const schedule = await new Schedule({
-        userId: user._id,
-        scheduleDate,
-      }).save();
-      schedules.push(schedule);
-    }
-
-    user.schedules = schedules;
-
-    await user.save()
+    await user.save();
 
     // Generate PDF
     const pdfFilePath = path.join('userTimeTables', `${user._id}.pdf`);
-    const htmlContent = generateUserScheduleHtml();
+    const nextFiveDays = getNextFiveDaysExcludingSunday();
+    const htmlContent = generateUserScheduleHtml(nextFiveDays[0], nextFiveDays[1], nextFiveDays[2], nextFiveDays[3], nextFiveDays[4], nextFiveDays[5]);
 
     pdf.create(htmlContent, {}).toFile(pdfFilePath, err => {
       if (err) {
         console.error('Error generating PDF:', err);
-        res.status(500).json({message: 'Error generating PDF'});
+        res.status(500).json({ message: 'Error generating PDF' });
       } else {
         const userResponse = user.toObject();
         delete userResponse.fingerprint;
 
+        axios.post("http://127.0.0.1:5000/print", {
+          file: `${user._id}.pdf`
+        })
+
         res.status(201).json({
           user: userResponse,
-          pdfUrl: `${req.protocol}://${req.get('host')}/userTimeTables/${
-            user._id
-          }.pdf`,
+          pdfUrl: `${req.protocol}://${req.get('host')}/userTimeTables/${user._id}.pdf`,
         });
       }
     });
+
+
   } catch (error) {
-    res.status(400).json({message: error.message});
+    res.status(400).json({ message: error.message });
   }
 };
 
