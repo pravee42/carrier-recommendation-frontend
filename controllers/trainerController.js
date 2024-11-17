@@ -20,6 +20,7 @@ const getUnverifiedUsers = async (req, res) => {
 // Controller to verify multiple users
 const verifyUsers = async (req, res) => {
   try {
+    const admin = req?.user
     const { userIds } = req.body; // Expecting an array of user IDs to be verified
 
     if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
@@ -29,7 +30,7 @@ const verifyUsers = async (req, res) => {
     // Verify all users in the userIds array
     const result = await User.updateMany(
       { _id: { $in: userIds }, isVerified: false }, // Ensure we're only verifying users who are not already verified
-      { $set: { isVerified: true } }
+      { $set: { isVerified: true, verifiedBy: admin?._id } }
     );
 
     if (result.nModified === 0) {
