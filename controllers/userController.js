@@ -1,6 +1,4 @@
 const User = require('../models/User');
-const Schedule = require('../models/Schedule');
-const dayjs = require('dayjs');
 const path = require('path');
 const pdf = require('html-pdf');
 const level2 = require('../models/Level2')

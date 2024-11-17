@@ -20,7 +20,6 @@ const createExamResult = async (req, res) => {
 
   console.log(req.body)
 
-  console.log("dsnkjfnkjfnkjfndjkfjksfnkjnfjsnfkjsdnf")
 
   try {
     // Only apply the round progression check if level is 2 or higher
