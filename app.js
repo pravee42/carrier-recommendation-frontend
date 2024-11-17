@@ -17,6 +17,7 @@ const { uploadLevel2Images } = require("./utils/uploadImage");
 const operatorObservation = require("./routes/operatorObservationRoutes")
 const trainerRoutes = require('./routes/trainerRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
+const adminRoutes = require('./routes/AdminUserRoutes');
 
 
 const app = express();
@@ -73,6 +74,7 @@ app.use("/api/level3b", operatorObservation);
 app.use("/api/supervisor", superVisorRoutes);
 app.use('/api/trainer', trainerRoutes);
 app.use("/api/s", settingsRoutes)
+app.use("/api/admin", adminRoutes)
 
 app.post("/upload/level2AImages", upload.single("file"), uploadLevel2Images);
 app.post("/upload/userProfile", (req, res) => {

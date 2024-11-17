@@ -5,7 +5,7 @@ const MCQ = require('../models/mcq');
 const User = require('../models/User');
 
 
-const SATHISH_API = process.env.SATHISH_API_KEY
+const SATHISH_API = `https://lucas_ml.igniteskylabs.in`
 
 const SetActiveChannel = async (req, res) => {
   try {
@@ -37,7 +37,7 @@ const SetActiveChannel = async (req, res) => {
 
     if (level === 1) {
       try {
-        const data = await MCQ.findOne({}, {'questions.correctAnswer': 0});
+        const data = await MCQ.findOne({timeToComplete:1}, {'questions.correctAnswer': 0});
         return res.status(200).json(data);
       } catch (error) {
         return res.status(500).json({message: error.message});
@@ -86,29 +86,29 @@ const SetActiveChannel = async (req, res) => {
         );
         return res
           .status(200)
-          .send({video: '${SATHISH_API}/0/video_feed'}); // Add 'return'
+          .send({video: `${SATHISH_API}/0/video_feed`}); 
       } else if (round === 'C') {
         const start = await axios.get(
           `${SATHISH_API}/1/start_game?userId=${userId}`,
         );
         return res
           .status(200)
-          .send({video: '${SATHISH_API}/1/video_feed'}); // Add 'return'
+          .send({video: `${SATHISH_API}/1/video_feed`}); 
       } else if (round === 'D') {
         const start = await axios.get(
           `${SATHISH_API}/2/start_game?userId=${userId}`,
         );
         return res
           .status(200)
-          .send({video: '${SATHISH_API}/2/video_feed'}); // Add 'return'
+          .send({video: `${SATHISH_API}/2/video_feed`}); 
       }
     }
 
     // If no specific level or round matched, respond with the active channel data
-    return res.status(200).json(activechannel); // Add 'return'
+    return res.status(200).json(activechannel); 
   } catch (error) {
     console.error('Error in SetActiveChannel:', error);
-    return res.status(500).json({message: error.message}); // Add 'return'
+    return res.status(500).json({message: error.message});
   }
 };
 
