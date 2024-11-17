@@ -22,6 +22,7 @@ const uploadLevel2Images = async (req, res) => {
   }
 };
 
+
 const uploadUserProfileImage = (req, res) => {
   try {
     // Handle the uploaded user profile image

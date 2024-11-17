@@ -82,6 +82,11 @@ app.post("/upload/userProfile", (req, res) => {
 });
 app.use("/level2AQuestions", express.static(path.join(__dirname, "level2AQuestions")));
 
+// Serve static files for uploaded images
+app.use('/level2AQuestions', express.static(path.join(__dirname, 'level2AQuestions')));
+app.use('/userImages', express.static(path.join(__dirname, 'userImages')));
+
+
 // Start the server
 server.listen(3000, () => {
   console.log("listening on *:3000");

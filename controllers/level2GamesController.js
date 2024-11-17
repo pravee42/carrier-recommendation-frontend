@@ -39,28 +39,30 @@ const addLevel2Models = async (req, res) => {
 // Controller to add or update MCQ questions
 const addLevel2AQuestionsController = async (req, res) => {
   try {
-    const {questions, passPercentage, timeToComplete, workingLine, totalMarks} =
-      req.body;
+    const { questions, passPercentage, timeToComplete, workingLine, totalMarks } = req.body;
 
+    // Find and update the document that matches the workingLine
     const mcq = await level2A.findOneAndUpdate(
-      {},
+      { workingLine }, // Query condition to match the workingLine
       {
         $set: {
           questions,
           passPercentage,
           timeToComplete,
-          workingLine,
           totalMarks,
         },
       },
-      {upsert: true, new: true},
+      { upsert: true, new: true } // If no document matches, create a new one; return the updated document
     );
 
+    // Respond with the updated document
     res.status(200).json(mcq);
   } catch (error) {
-    res.status(500).json({message: error.message});
+    // Handle errors
+    res.status(500).json({ message: error.message });
   }
 };
+
 
 const submitLevel2AResultController = async (req, res) => {
   try {
@@ -155,6 +157,24 @@ const calibrateMultipleCameras = async (req, res) => {
   }
 };
 
+// api need to get calibration
+
+const getCalibratedDatas = async (req, res) => {
+
+  try {
+   const data = await level2Games.find()
+// 
+    // const results = await Promise.all(updatePromises);
+
+    res.json({
+      message: 'Camera URLs calibrated successfully',
+      data,
+    });
+  } catch (error) {
+    res.status(500).json({message: 'Error calibrating camera URLs', error});
+  }
+};
+
 const addTutorialSection = async (req, res) => {
   try {
     const {round, tutorialVideo, tutorialImages} = req.body;
@@ -227,5 +247,6 @@ module.exports = {
   calibrateMultipleCameras,
   addTutorialSection,
   getTutorialSection,
-  getLevel2CompletedUsers
+  getLevel2CompletedUsers,
+  getCalibratedDatas
 };
