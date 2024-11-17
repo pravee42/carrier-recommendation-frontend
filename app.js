@@ -87,7 +87,6 @@ app.post("/upload/userProfile", (req, res) => {
     res.status(200).json({ message: "User profile image uploaded successfully", file: req.file });
   });
 });
-app.use("/level2AQuestions", express.static(path.join(__dirname, "level2AQuestions")));
 
 // Serve static files for uploaded images
 app.use('/level2AQuestions', express.static(path.join(__dirname, 'level2AQuestions')));
