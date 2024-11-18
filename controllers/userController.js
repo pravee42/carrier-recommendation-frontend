@@ -105,7 +105,7 @@ const validateUser = async (req, res) => {
     };
 
     const response = await axios.post(
-      `${process.env.CENTERAL_SERVER}/match`,
+      `${"http://127.0.0.1:5000"}/match`,
       matchPayload,
     );
     const data = response.data.MatchingScore > 100;

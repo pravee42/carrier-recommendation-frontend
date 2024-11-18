@@ -37,7 +37,7 @@ const SetActiveChannel = async (req, res) => {
 
     if (level === 1) {
       try {
-        const data = await MCQ.findOne({timeToComplete:1}, {'questions.correctAnswer': 0});
+        const data = await MCQ.findOne({'questions.correctAnswer': 0});
         return res.status(200).json(data);
       } catch (error) {
         return res.status(500).json({message: error.message});
