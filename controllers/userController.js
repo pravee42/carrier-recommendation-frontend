@@ -10,8 +10,6 @@ const {sendMailToTrainer} = require('../utils/mail');
 const Level2Games = require('../models/level2Games');
 const {generateUserScheduleHtml} = require('../utils/generateUserScheduleHtml');
 const Settings = require('../models/Settings');
-const html_to_pdf = require('html-pdf-node');
-
 
 function getNextFiveDaysExcludingSunday() {
   const days = [];
@@ -44,78 +42,48 @@ const createUser = async (req, res) => {
     // Generate PDF
     const pdfFilePath = path.join('userTimeTables', `${user._id}.pdf`);
     const nextFiveDays = getNextFiveDaysExcludingSunday();
-    let options = {format: 'A4'};
-    const htmlContent = [{url: generateUserScheduleHtml(
+    const htmlContent = generateUserScheduleHtml(
       nextFiveDays[0],
       nextFiveDays[1],
       nextFiveDays[2],
       nextFiveDays[3],
       nextFiveDays[4],
       nextFiveDays[5],
-    ), nname:  `${user._id}.pdf`}];
+    );
 
-    html_to_pdf.generatePdf(htmlContent, options).then(pdfBuffer => {
-      const userResponse = user.toObject();
-      delete userResponse.fingerprint;
+    pdf.create(htmlContent, {}).toFile(pdfFilePath, err => {
+      if (err) {
+        console.error('Error generating PDF:', err);
+        res.status(500).json({message: 'Error generating PDF'});
+      } else {
+        const userResponse = user.toObject();
+        delete userResponse.fingerprint;
 
-      sendMailToTrainer(traineeEmail, user._id, traineeName);
+        sendMailToTrainer(traineeEmail, user._id, traineeName);
 
-      try {
-        axios.post('http://127.0.0.1:5000/print', {
-          file: `${user._id}.pdf`,
-        });
-      } catch (err) {
-        console.log('error', err.message);
-        res.status(500).json({
-          message: 'Error Printing Pdf',
+        try {
+          const res = axios.post('http://127.0.0.1:5000/print', {
+            file: `${user._id}.pdf`,
+          });
+        } catch (err) {
+          console.log('error', err.message);
+          res.status(500).json({
+            message: 'Error Printing Pdf',
+            user: userResponse,
+            pdfUrl: `${req.protocol}://${req.get('host')}/userTimeTables/${
+              user._id
+            }.pdf`,
+          });
+        }
+
+        res.status(201).json({
           user: userResponse,
           pdfUrl: `${req.protocol}://${req.get('host')}/userTimeTables/${
             user._id
           }.pdf`,
         });
       }
-
-      res.status(201).json({
-        user: userResponse,
-        pdfUrl: `${req.protocol}://${req.get('host')}/userTimeTables/${
-          user._id
-        }.pdf`,
-      });
     });
-
-    // pdf.create(htmlContent, {}).toFile(pdfFilePath, err => {
-    //   if (err) {
-    //     console.error('Error generating PDF:', err);
-    //     res.status(500).json({message: 'Error generating PDF'});
-    //   } else {
-    //     const userResponse = user.toObject();
-    //     delete userResponse.fingerprint;
-
-    //     sendMailToTrainer(traineeEmail, user._id, traineeName);
-
-    //     try {
-    //       axios.post('http://127.0.0.1:5000/print', {
-    //         file: `${user._id}.pdf`,
-    //       });
-    //     } catch (err) {
-    //       console.log('error', err.message);
-    //       res.status(500).json({
-    //         message: 'Error Printing Pdf',
-    //         user: userResponse,
-    //         pdfUrl: `${req.protocol}://${req.get('host')}/userTimeTables/${
-    //           user._id
-    //         }.pdf`,
-    //       });
-    //     }
-
-    //     res.status(201).json({
-    //       user: userResponse,
-    //       pdfUrl: `${req.protocol}://${req.get('host')}/userTimeTables/${
-    //         user._id
-    //       }.pdf`,
-    //     });
-    //   }
-    // });
   } catch (error) {
     res.status(400).json({message: error.message});
   }

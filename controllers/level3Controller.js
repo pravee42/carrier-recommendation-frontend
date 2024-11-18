@@ -1,5 +1,5 @@
 const Level3 = require('../models/level3');
-const SuperVisor = require('../models/Supervisor');
+const AdminUser = require('../models/AdminUser');
 const User = require('../models/User');
 const { sendMailToSuperVisor } = require('../utils/mail');
 
@@ -97,7 +97,7 @@ exports.bulkUpdateSupervisors = async (req, res) => {
         await user.save();
 
         // Fetch supervisor email
-        const supervisor = await SuperVisor.findById(supervisorId);
+        const supervisor = await AdminUser.findById(supervisorId);
         
         if (supervisor && supervisor.email) {
           // Send email to the supervisor

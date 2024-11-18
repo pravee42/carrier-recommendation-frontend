@@ -28,7 +28,7 @@ const addLevel2Models = async (req, res) => {
 
     const level2Game = await level2Games.findOneAndUpdate(
       {modelName},
-      {$set: {modelName, device, cameraUrl: ''}},
+      {$set: {modelName, device}},
       {upsert: true, new: true},
     );
 

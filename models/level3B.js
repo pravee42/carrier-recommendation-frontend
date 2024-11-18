@@ -15,7 +15,7 @@ const operatorObservationSchema = new mongoose.Schema({
   userId:  {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
   assignieId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'SuperVisor',
+    ref: 'AdminUser',
     required: true,
   },
   stationNo: Number,

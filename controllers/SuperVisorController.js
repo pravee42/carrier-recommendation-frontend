@@ -1,21 +1,32 @@
-const SuperVisor = require('../models/Supervisor');
+const AdminUser = require('../models/AdminUser');
 
 exports.createSupervisor = async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
+    const { name, email, phone, password } = req.body;
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newSupervisor = new SuperVisor({ name, email, phone });
-    await newSupervisor.save();
+    const newUser = new AdminUser({
+      username,
+      password: hashedPassword,
+      name,
+      email,
+      phone,
+      role: 'supervisor',
+    });
 
-    res.status(201).json({ message: 'Supervisor created successfully', data: newSupervisor });
+    await newUser.save();
+
+    res.status(201).json({ message: 'Supervisor created successfully', data: newUser });
   } catch (error) {
     res.status(500).json({ message: 'Error creating supervisor', error: error.message });
   }
 };
 
+
 exports.getAllSupervisors = async (req, res) => {
   try {
-    const supervisors = await SuperVisor.find();
+    const supervisors = await AdminUser.find({role: 'supervisor'});
     res.status(200).json({ data: supervisors });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching supervisors', error: error.message });
@@ -25,7 +36,7 @@ exports.getAllSupervisors = async (req, res) => {
 exports.getSupervisorById = async (req, res) => {
   try {
     const { id } = req.params;
-    const supervisor = await SuperVisor.findById(id);
+    const supervisor = await AdminUser.findById(id);
 
     if (!supervisor) {
       return res.status(404).json({ message: 'Supervisor not found' });
@@ -40,11 +51,13 @@ exports.getSupervisorById = async (req, res) => {
 exports.updateSupervisor = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, phone } = req.body;
+    const { name, email, phone, password } = req.body;
 
-    const updatedSupervisor = await SuperVisor.findByIdAndUpdate(
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const updatedSupervisor = await AdminUser.findByIdAndUpdate(
       id,
-      { name, email, phone },
+      { name, email, phone, hashedPassword },
       { new: true }
     );
 
@@ -61,7 +74,7 @@ exports.updateSupervisor = async (req, res) => {
 exports.deleteSupervisor = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedSupervisor = await SuperVisor.findByIdAndDelete(id);
+    const deletedSupervisor = await AdminUser.findByIdAndDelete(id);
 
     if (!deletedSupervisor) {
       return res.status(404).json({ message: 'Supervisor not found' });
