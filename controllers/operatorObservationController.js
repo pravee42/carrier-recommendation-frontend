@@ -3,7 +3,7 @@ const operatorObservation = require('../models/level3B');
 
 exports.addOrReplaceOperatorObservation = async (req, res) => {
   try {
-    const { userId, lineName, department, stationNo, checkPoints, totalPoints, assignieId } = req.body;
+    const { userId, lineName, department, stationNo, checkPoints, totalPoints, assignieId, day } = req.body;
 
     // Check how many documents the user has already added
     const existingDocuments = await operatorObservation.find({ userId });
@@ -24,7 +24,7 @@ exports.addOrReplaceOperatorObservation = async (req, res) => {
           checkPoints, 
           totalPoints, 
           assignieId,
-          date: new Date() 
+          day
         }, 
         { new: true } 
       );
