@@ -71,9 +71,9 @@ const SetActiveChannel = async (req, res) => {
             questions,
             shuffledAnswers,
             level: 2,
-            timeToComplete,
             nameOfWorkingLine,
-            round: 'A'
+            round: 'A',
+            timeToComplete: questionsData?.timeToComplete || 300
           });
 
           // return res.status(200).json(data);
