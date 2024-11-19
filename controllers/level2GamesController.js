@@ -5,7 +5,7 @@ const activeChannel = require('../models/activeChannel');
 const User = require('../models/User');
 const Exam = require('../models/Exam');
 
-const SATHISH_VIDEO_API = `https://lucas_ml.igniteskylabs.in`
+const SATHISH_VIDEO_API = `https://lucas_ml.igniteskylabs.in`;
 
 const Getlevel2GamesController = async (req, res) => {
   try {
@@ -41,11 +41,12 @@ const addLevel2Models = async (req, res) => {
 // Controller to add or update MCQ questions
 const addLevel2AQuestionsController = async (req, res) => {
   try {
-    const { questions, passPercentage, timeToComplete, workingLine, totalMarks } = req.body;
+    const {questions, passPercentage, timeToComplete, workingLine, totalMarks} =
+      req.body;
 
     // Find and update the document that matches the workingLine
     const mcq = await level2A.findOneAndUpdate(
-      { workingLine }, // Query condition to match the workingLine
+      {workingLine}, // Query condition to match the workingLine
       {
         $set: {
           questions,
@@ -54,17 +55,16 @@ const addLevel2AQuestionsController = async (req, res) => {
           totalMarks,
         },
       },
-      { upsert: true, new: true } // If no document matches, create a new one; return the updated document
+      {upsert: true, new: true}, // If no document matches, create a new one; return the updated document
     );
 
     // Respond with the updated document
     res.status(200).json(mcq);
   } catch (error) {
     // Handle errors
-    res.status(500).json({ message: error.message });
+    res.status(500).json({message: error.message});
   }
 };
-
 
 const submitLevel2AResultController = async (req, res) => {
   try {
@@ -126,15 +126,12 @@ const GetQuestionsLevel2AController = async (req, res) => {
   const {type} = req.body;
   try {
     // Find all questions and exclude the correctAnswer field
-    const data = await level2A.find(
-      {workingLine: type},
-    );
+    const data = await level2A.find({workingLine: type});
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({message: error.message});
   }
 };
-
 
 const calibrateMultipleCameras = async (req, res) => {
   const updates = req.body; // Expecting an array of { modelName, cameraUrl }
@@ -162,10 +159,9 @@ const calibrateMultipleCameras = async (req, res) => {
 // api need to get calibration
 
 const getCalibratedDatas = async (req, res) => {
-
   try {
-   const data = await level2Games.find()
-// 
+    const data = await level2Games.find();
+    //
     // const results = await Promise.all(updatePromises);
 
     res.json({
@@ -215,28 +211,61 @@ const getTutorialSection = async (req, res) => {
 };
 
 const getLevel2CompletedUsers = async (req, res) => {
-  try {
-    const qualifiedExams = await Exam.find({
-      level: 2,
-      round: 'D',
-      status: 'pass'
-    }).populate({
-      path: 'userId',
-      model: User,
-      select: 'traineeName DOJ mobileNo qualification branch designationGrade fingerprint verified verifiedBy userImage nameOfWorkingLine', 
-    });
+  if (req.user?.role === 'admin') {
+    try {
+      const qualifiedExams = await Exam.find({
+        level: 2,
+        round: 'D',
+        status: 'pass',
+      }).populate({
+        path: 'userId',
+        model: User,
+        select:
+          'traineeName DOJ mobileNo qualification branch designationGrade fingerprint verified verifiedBy userImage nameOfWorkingLine supervisorId',
+      });
 
-    const users = qualifiedExams.map(exam => exam.userId);
+      const users = qualifiedExams.map(exam => exam.userId);
 
-    res.status(200).json({
-      message: 'Qualified users retrieved successfully',
-      data: users,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Error fetching qualified users',
-      error: error.message,
-    });
+      res.status(200).json({
+        message: 'Qualified users retrieved successfully',
+        data: users,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: 'Error fetching qualified users',
+        error: error.message,
+      });
+    }
+  } else if (req?.user?.role === 'supervisor') {
+    try {
+      const qualifiedExams = await Exam.find({
+        level: 2,
+        round: 'D',
+        status: 'pass',
+      }).populate({
+        path: 'userId',
+        model: User,
+        match: {supervisorId: req.user?.id},
+        select:
+          'traineeName DOJ mobileNo qualification branch designationGrade fingerprint verified verifiedBy userImage nameOfWorkingLine',
+      });
+
+      const users = qualifiedExams.map(exam => exam.userId);
+
+      res.status(200).json({
+        message: 'Qualified users retrieved successfully',
+        data: users,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: 'Error fetching qualified users',
+        error: error.message,
+      });
+    }
+  } else {
+    return res
+      .status(400)
+      .json({message: "you don't have permission to view this data"});
   }
 };
 
@@ -250,5 +279,5 @@ module.exports = {
   addTutorialSection,
   getTutorialSection,
   getLevel2CompletedUsers,
-  getCalibratedDatas
+  getCalibratedDatas,
 };

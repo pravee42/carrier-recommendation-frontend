@@ -110,7 +110,7 @@ const validateUser = async (req, res) => {
     );
     const data = response.data.MatchingScore > 100;
 
-    const lastUserExam = await Exam.find({userId: user._id});
+    const lastUserExam = await Exam.find({userId: user._id, status: "pass"});
     const lastData = lastUserExam[lastUserExam.length - 1];
 
     // Fetch devices dynamically from Level2Games
