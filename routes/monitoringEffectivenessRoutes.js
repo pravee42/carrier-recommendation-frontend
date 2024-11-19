@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const authenticate = require('../middleware/authendicate');
+
 const {
   addMonitoringEffectiveness,
   getMonitoringEffectiveness,
@@ -8,42 +10,46 @@ const {
 } = require('../controllers/monitoringEffectivenessController');
 
 // Route to add a new monitoring effectiveness entry
-router.post('/add', async (req, res) => {
+router.post('/add', authenticate, async (req, res) => {
   try {
-    const newEntry = await addMonitoringEffectiveness(req.body);
-    res.status(201).json(newEntry);
+    const supervisor = req?.user?.id
+    const newEntry = await addMonitoringEffectiveness(req.body, supervisor);
+    res.status(201).json({success: "Record Added Successfully"});
   } catch (error) {
-    res.status(500).json({ message: 'Error adding entry', error });
+    res.status(500).json({message: 'Error adding entry', error});
   }
 });
 
-// Route to get all monitoring effectiveness entries for a user
-router.get('/:userId', async (req, res) => {
+// Route to get all monito]\ing effectiveness entries for a user
+router.get('/:userId', authenticate, async (req, res) => {
   try {
     const entries = await getMonitoringEffectiveness(req.params.userId);
     res.status(200).json(entries);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching entries', error });
+    res.status(500).json({message: 'Error fetching entries', error});
   }
 });
 
 // Route to update a monitoring effectiveness entry by ID
-router.put('/update/:id', async (req, res) => {
+router.put('/update/:id', authenticate, async (req, res) => {
   try {
-    const updatedEntry = await updateMonitoringEffectiveness(req.params.id, req.body);
-    res.status(200).json(updatedEntry);
+    const updatedEntry = await updateMonitoringEffectiveness(
+      req.params.id,
+      req.body,
+    );
+    res.status(201).json({success: "Record Updated Successfully"});
   } catch (error) {
-    res.status(500).json({ message: 'Error updating entry', error });
+    res.status(500).json({message: 'Error updating entry', error});
   }
 });
 
 // Route to delete a monitoring effectiveness entry by ID
-router.delete('/delete/:id', async (req, res) => {
+router.delete('/delete/:id', authenticate, async (req, res) => {
   try {
     await deleteMonitoringEffectiveness(req.params.id);
-    res.status(200).json({ message: 'Entry deleted successfully' });
+    res.status(200).json({message: 'Entry deleted successfully'});
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting entry', error });
+    res.status(500).json({message: 'Error deleting entry', error});
   }
 });
 

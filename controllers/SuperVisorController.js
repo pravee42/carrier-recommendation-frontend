@@ -1,10 +1,11 @@
+const bcryptjs = require('bcryptjs');
 const AdminUser = require('../models/AdminUser');
 
 exports.createSupervisor = async (req, res) => {
   try {
-    const { name, email, phone, password } = req.body;
+    const { name, email, phone, password, username } = req.body;
     
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcryptjs.hash(password, 10);
 
     const newUser = new AdminUser({
       username,

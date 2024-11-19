@@ -1,40 +1,49 @@
-const MonitoringEffectiveness = require('../models/monitoringEffectiveness');
+const {client} = require('../config/client');
+const {ObjectId} = require('mongodb');
 
-async function enforceMonthlyLimit(userId) {
-  const entries = await MonitoringEffectiveness.find({userId}).sort({date: 1});
+async function addMonitoringEffectiveness(data, supervisor) {
+  const db = client.db('test');
+  const collection = db.collection('monitoringEffectiveness');
 
-  if (entries.length >= 12) {
-    await MonitoringEffectiveness.deleteOne({
-      _id: entries[entries.length - 1]._id,
-    });
-  }
-}
+  const result = await collection.findOneAndUpdate(
+    {userId: data.userId}, // Query to match documents with the same userId
+    {$set: {...data, supervisor}}, // Update operation to set new data
+    {upsert: true, returnDocument: 'after'}, // Options: upsert and return updated document
+  );
 
-async function addMonitoringEffectiveness(data) {
-  await enforceMonthlyLimit(data.userId);
-
-  const newEntry = new MonitoringEffectiveness(data);
-  await newEntry.save();
-
-  return newEntry;
+  return result.value;
 }
 
 async function getMonitoringEffectiveness(userId) {
-  const entries = await MonitoringEffectiveness.find({userId}).sort({date: -1});
+  const db = client.db('test');
+  const collection = db.collection('monitoringEffectiveness');
+
+  const entries = await collection.find({userId});
+
   return entries;
 }
 
 async function updateMonitoringEffectiveness(id, updateData) {
-  const entry = await MonitoringEffectiveness.findByIdAndUpdate(
-    id,
-    updateData,
-    {new: true},
+  const db = client.db('test');
+  const collection = db.collection('monitoringEffectiveness');
+
+  // Update the document by its ID
+  const result = await collection.findOneAndUpdate(
+    {_id: new ObjectId(id)},
+    {$set: updateData},
+    {returnDocument: 'after'},
   );
-  return entry;
+
+  return result.value; // Return the updated document
 }
 
 async function deleteMonitoringEffectiveness(id) {
-  await MonitoringEffectiveness.findByIdAndDelete(id);
+  const db = client.db('test');
+  const collection = db.collection('monitoringEffectiveness');
+
+  // Delete the document by its ID
+  await collection.deleteOne({_id: new ObjectId(id)});
+
   return {message: 'Entry deleted successfully'};
 }
 

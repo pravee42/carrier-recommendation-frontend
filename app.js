@@ -19,12 +19,15 @@ const settingsRoutes = require('./routes/settingsRoutes');
 const adminRoutes = require('./routes/AdminUserRoutes');
 const monitoringMultiSkillRoutes = require('./routes/monitoringMultiSkillRoutes');
 const monitoringEffectivenessRoutes = require('./routes/monitoringEffectivenessRoutes');
+const {connectToMongoDB} = require('./config/client');
 
 const app = express();
 const server = http.createServer(app);
 
 // Initialize database connection
 connectDB();
+
+connectToMongoDB();
 
 // Middleware and configurations
 app.use(cors());
@@ -78,7 +81,6 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/monitoring-effectiveness', monitoringEffectivenessRoutes);
 app.use('/api/monitoring-multi-skill', monitoringMultiSkillRoutes);
 
-
 app.post('/upload/level2AImages', upload.single('file'), uploadLevel2Images);
 app.post('/upload/userProfile', (req, res) => {
   upload1.single('file')(req, res, err => {
@@ -91,12 +93,10 @@ app.post('/upload/userProfile', (req, res) => {
     if (!req.file) {
       return res.status(400).json({message: 'No file uploaded'});
     }
-    res
-      .status(200)
-      .json({
-        message: 'User profile image uploaded successfully',
-        file: req.file,
-      });
+    res.status(200).json({
+      message: 'User profile image uploaded successfully',
+      file: req.file,
+    });
   });
 });
 
