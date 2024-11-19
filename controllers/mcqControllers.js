@@ -128,7 +128,7 @@ const submitMCQResultController = async (req, res) => {
     );
 
     res.status(200).json({
-      status: passed,
+      status: passed ? 'pass' : 'fail',
       scorePercentage,
       earnedMarks,
       totalMarks,
