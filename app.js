@@ -101,11 +101,12 @@ app.post('/upload/userProfile', (req, res) => {
 });
 
 // Serve static files for uploaded images
-app.use(
-  '/level2AQuestions',
-  express.static(path.join(__dirname, 'level2AQuestions')),
-);
-app.use('/userImages', express.static(path.join(__dirname, 'userImages')));
+app.use('/level2AQuestions', express.static(path.join(__dirname, 'level2AQuestions'), {
+  setHeaders: (res) => res.set('Access-Control-Allow-Origin', '*')
+}));
+app.use('/userImages', express.static(path.join(__dirname, 'userImages'), {
+  setHeaders: (res) => res.set('Access-Control-Allow-Origin', '*')
+}));
 
 // Start the server
 server.listen(3000, () => {
