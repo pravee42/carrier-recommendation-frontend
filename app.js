@@ -84,7 +84,7 @@ app.post('dashboard/theme', addThemeData);
 app.post('dashboard/theme', getThemeData);
 
 // Add /update-excel route
-const filePath = path.resolve(__dirname, 'public', 'Dojo Dash Board(2).xlsx');
+const filePath = path.resolve(__dirname, 'uploads/xlsx', 'latest.xlsx');
 app.post('/update-excel', (req, res) => {
   const { editedData, sheetNames } = req.body;
 
