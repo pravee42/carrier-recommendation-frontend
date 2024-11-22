@@ -1,1 +1,5 @@
 node_modules/
+uploads/
+userImages/
+userTimeTables/
+.devcontainer
