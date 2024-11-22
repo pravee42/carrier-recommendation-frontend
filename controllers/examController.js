@@ -1,28 +1,28 @@
 const Exam = require('../models/Exam');
 const activeChannel = require('../models/activeChannel');
 const Settings = require('../models/Settings');
+const { emitMessage } = require('../utils/socketSetup');
 
 const createMCQSettings = async (req, res) => {
   try {
     const settings = await Settings.findOneAndUpdate(
       {},
-      {level1PassPercent: req.body.level1PassPercent},
-      {upsert: true, new: true},
+      { level1PassPercent: req.body.level1PassPercent },
+      { upsert: true, new: true }
     );
     res.status(200).json(settings);
   } catch (error) {
-    res.status(500).json({message: error.message});
+    res.status(500).json({ message: error.message });
   }
 };
 
 const createExamResult = async (req, res) => {
-  const {userId, level, round, timeTaken, mistakes, status} = req.body;
+  const { userId, level, round, timeTaken, mistakes, status } = req.body;
 
   console.log(req.body)
 
 
   try {
-    // Only apply the round progression check if level is 2 or higher
     if (level >= 2) {
       const roundOrder = ['B', 'C', 'D'];
       const currentRoundIndex = roundOrder.indexOf(round);
@@ -45,23 +45,20 @@ const createExamResult = async (req, res) => {
       }
     }
 
-    // Find all attempts for the same user, level, and round
-    const userAttempts = await Exam.find({userId, level, round}).sort({
+    const userAttempts = await Exam.find({ userId, level, round }).sort({
       createdAt: 1,
     });
 
     let examResult;
     if (userAttempts.length >= 5) {
-      // If there are 5 attempts, overwrite the oldest attempt (first item in sorted list)
-      const oldestAttempt = userAttempts[userAttempts.length-1];
+      const oldestAttempt = userAttempts[userAttempts.length - 1];
       oldestAttempt.timeTaken = timeTaken;
       oldestAttempt.mistakes = mistakes;
-      oldestAttempt.status = status;
-      oldestAttempt.attempts += 1; // Increment the attempts count
+      oldestAttempt.status = status ? "pass" : "fail";
+      oldestAttempt.attempts += 1;
 
       examResult = await oldestAttempt.save();
     } else {
-      // If less than 5 attempts, create a new exam result
       examResult = await new Exam({
         userId,
         level,
@@ -69,31 +66,40 @@ const createExamResult = async (req, res) => {
         attempts: 1,
         timeTaken,
         mistakes,
-        status,
+        status: status ? "pass" : "fail",
       }).save();
     }
 
-    const deviceToUpdate = await activeChannel.find({userId})
+    try {
+      const deviceToUpdate = await activeChannel.find({
+        userId,
+        status: 'started'
+      })
+      .sort({ lastConnectedTime: -1 })
+      .limit(1);
 
-    if (deviceToUpdate) {
-      emitMessage(deviceToUpdate.device, examResult);
+      if (deviceToUpdate?.[0]) {
+        emitMessage(deviceToUpdate[0].device, examResult);
+      } else {
+        console.log("no device to update has been added");
+      }
+    } catch (error) {
+      console.log(error.message, "error emitting");
     }
 
     await activeChannel.findOneAndUpdate(
-      {device: deviceToUpdate},
+      { device: deviceToUpdate?.[0]?.device },
       {
         userId: userId,
         status: 'ended',
       },
-      {new: true, upsert: true},
+      { new: true, upsert: true }
     );
 
     res.status(userAttempts.length >= 5 ? 200 : 201).json(examResult);
   } catch (error) {
-    res.status(400).json({message: error.message});
+    res.status(400).json({ message: error.message });
   }
 };
 
-
-
-module.exports = {createMCQSettings, createExamResult};
+module.exports = { createMCQSettings, createExamResult };

@@ -10,7 +10,6 @@ const superVisorRoutes = require('./routes/supervisorRoutes');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const cors = require('cors');
 const { initializeSocket, emitMessage } = require('./utils/socketSetup');
 const { uploadLevel2Images } = require('./utils/uploadImage');
 const operatorObservation = require('./routes/operatorObservationRoutes');
@@ -20,7 +19,6 @@ const adminRoutes = require('./routes/AdminUserRoutes');
 const monitoringMultiSkillRoutes = require('./routes/monitoringMultiSkillRoutes');
 const monitoringEffectivenessRoutes = require('./routes/monitoringEffectivenessRoutes');
 const { connectToMongoDB } = require('./config/client');
-const { addThemeData, getThemeData } = require('./controllers/dashboardController');
 const XLSX = require('xlsx');  // Add XLSX for Excel operations
 
 const app = express();
@@ -31,7 +29,6 @@ connectDB();
 connectToMongoDB();
 
 // Middleware and configurations
-app.use(cors());
 app.use(express.json());
 
 // Initialize WebSocket server
@@ -80,8 +77,6 @@ app.use('/api/s', settingsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/monitoring-effectiveness', monitoringEffectivenessRoutes);
 app.use('/api/monitoring-multi-skill', monitoringMultiSkillRoutes);
-app.post('dashboard/theme', addThemeData);
-app.post('dashboard/theme', getThemeData);
 
 // Add /update-excel route
 const filePath = path.resolve(__dirname, 'uploads/xlsx', 'latest.xlsx');
@@ -157,16 +152,25 @@ app.post('/uploads/userProfile', (req, res) => {
 // Serve static files for uploaded images
 app.use(
   '/level2AQuestions',
-  express.static(path.join(__dirname, 'level2AQuestions'), {
-    setHeaders: res => res.set('Access-Control-Allow-Origin', '*'),
-  }),
+  express.static(path.join(__dirname, 'uploads/level2AQuestions')
+),
 );
 app.use(
   '/userImages',
-  express.static(path.join(__dirname, 'userImages'), {
-    setHeaders: res => res.set('Access-Control-Allow-Origin', '*'),
-  }),
+  express.static(path.join(__dirname, 'uploads/userImages')
+),
 );
 
+app.get('/xlsx/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, 'uploads/xlsx', filename);
+
+  res.sendFile(filePath, (err) => {
+      if (err) {
+          console.error('Error sending file:', err);
+          res.status(404).send('File not found');
+      }
+  });
+});
 
 module.exports = { app, server, emitMessage };

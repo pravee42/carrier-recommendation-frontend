@@ -105,7 +105,7 @@ const validateUser = async (req, res) => {
     };
 
     const response = await axios.post(
-      `${'http://127.0.0.1:5000'}/match`,
+      `${"http://127.0.0.1:5000"}/match`,
       matchPayload,
     );
     const data = response.data.MatchingScore > 100;
@@ -115,7 +115,7 @@ const validateUser = async (req, res) => {
 
     // Fetch devices dynamically from Level2Games
     const level2Games = await Level2Games.find({});
-    const deviceMapping = level2Games.reduce((acc, game) => {
+    const deviceMapping = level2Games?.reduce((acc, game) => {
       acc[game.modelName] = acc[game.modelName] || [];
       acc[game.modelName].push(game.device);
       return acc;
@@ -174,6 +174,7 @@ const validateUser = async (req, res) => {
 
     const getActiveDevice = await activeChannel.findOne({
       device: deviceToUpdate,
+
     });
 
     if (!getActiveDevice) {
@@ -220,17 +221,16 @@ const validateUser = async (req, res) => {
 
       // console.log(userResponse.nextSession.round)
 
-      const tutorial = await level2.findOne({
+      const tutorial = await level2?.findOne({
         round: userResponse.nextSession.round,
       });
 
-      userResponse.nextSession.tutorialVideo = tutorial.tutorialVideo;
-      userResponse.nextSession.tutorialImages = tutorial.tutorialImages;
+      userResponse.nextSession.tutorialVideo = tutorial?.tutorialVideo;
+      userResponse.nextSession.tutorialImages = tutorial?.tutorialImages;
 
       if (deviceToUpdate) {
         emitMessage(deviceToUpdate, userResponse);
       }
-      
 
       if (
         user._id === getActiveDevice.userId &&

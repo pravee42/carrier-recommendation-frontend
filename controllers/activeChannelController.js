@@ -26,9 +26,8 @@ const SetActiveChannel = async (req, res) => {
     }
 
     const activechannel = await activeChannel.findOneAndUpdate(
-      {device: device},
+      {device: device, userId: userId},
       {
-        userId: userId,
         lastConnectedTime: new Date(),
         status: 'started',
       },
@@ -37,7 +36,7 @@ const SetActiveChannel = async (req, res) => {
 
     if (level === 1) {
       try {
-        const data = await MCQ.findOne({},{'questions.correctAnswer': 0});
+        const data = await MCQ.findOne({}, {'questions.correctAnswer': 0});
         return res.status(200).json(data);
       } catch (error) {
         return res.status(500).json({message: error.message});
@@ -81,14 +80,15 @@ const SetActiveChannel = async (req, res) => {
           return res.status(500).json({message: error.message});
         }
       } else if (round === 'B') {
-        const start = await axios.get(
+        const start = axios.get(
           `${SATHISH_API}/0/start_game?userId=${userId}`,
         );
+        console.log("started level2 bs")
         return res
           .status(200)
           .send({video: `${SATHISH_API}/0/video_feed`}); 
       } else if (round === 'C') {
-        const start = await axios.get(
+        const start = axios.get(
           `${SATHISH_API}/1/start_game?userId=${userId}`,
         );
         return res
