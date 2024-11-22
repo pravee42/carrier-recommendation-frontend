@@ -105,12 +105,12 @@ const validateUser = async (req, res) => {
     };
 
     const response = await axios.post(
-      `${"http://127.0.0.1:5000"}/match`,
+      `${'http://127.0.0.1:5000'}/match`,
       matchPayload,
     );
     const data = response.data.MatchingScore > 100;
 
-    const lastUserExam = await Exam.find({userId: user._id, status: "pass"});
+    const lastUserExam = await Exam.find({userId: user._id, status: 'pass'});
     const lastData = lastUserExam[lastUserExam.length - 1];
 
     // Fetch devices dynamically from Level2Games
@@ -230,6 +230,7 @@ const validateUser = async (req, res) => {
       if (deviceToUpdate) {
         emitMessage(deviceToUpdate, userResponse);
       }
+      
 
       if (
         user._id === getActiveDevice.userId &&
