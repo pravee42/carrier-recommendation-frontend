@@ -173,4 +173,29 @@ app.get('/xlsx/:filename', (req, res) => {
   });
 });
 
+app.get('/xlsx_backups', (req, res) => {
+  const filePath = path.join(__dirname, 'uploads/xlsx_backups');
+
+  fs.readdir(filePath, (err, files) => {
+    if (err) {
+      return res.status(200).json({ files: [] });
+    }
+    res.status(200).json({
+      files: files.filter(file => file.endsWith('.xlsx'))
+    });
+  });
+});
+
+app.get('/xlsx_backups/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, 'uploads/xlsx_backups', filename);
+
+  res.sendFile(filePath, (err) => {
+    if (err) {
+        console.error('Error sending file:', err);
+        res.status(404).send('File not found');
+    }
+  });
+});
+
 module.exports = { app, server, emitMessage };
