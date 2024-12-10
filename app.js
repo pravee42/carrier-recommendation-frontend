@@ -20,6 +20,7 @@ const monitoringMultiSkillRoutes = require('./routes/monitoringMultiSkillRoutes'
 const monitoringEffectivenessRoutes = require('./routes/monitoringEffectivenessRoutes');
 const { connectToMongoDB } = require('./config/client');
 const XLSX = require('xlsx');  // Add XLSX for Excel operations
+var cors = require('cors')
 
 const app = express();
 const server = http.createServer(app);
@@ -37,11 +38,15 @@ initializeSocket(server);
 // File storage and upload configurations
 const dir = './uploads/level2AQuestions';
 const userProfile = './uploads/userImages';
+const dashboard_uploads_dir = './uploads/dashboard_pdf';
 if (!fs.existsSync(dir)) {
   fs.mkdirSync(dir);
 }
 if (!fs.existsSync(userProfile)) {
   fs.mkdirSync(userProfile);
+}
+if (!fs.existsSync(dashboard_uploads_dir)) {
+  fs.mkdirSync(dashboard_uploads_dir);
 }
 
 const storage = multer.diskStorage({
@@ -62,8 +67,18 @@ const storage1 = multer.diskStorage({
   },
 });
 
+const dashboard_uploads_storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, dashboard_uploads_dir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${req.body.uniqueId}.pdf`);
+  },
+});
+
 const upload = multer({ storage });
 const upload1 = multer({ storage: storage1 });
+const upload_dashboard = multer({ storage: dashboard_uploads_storage });
 
 // Routes
 app.use('/api/users', userRoutes);
@@ -148,6 +163,13 @@ app.post('/uploads/userProfile', (req, res) => {
     });
   });
 });
+app.post('/uploads/dashboard_pdf', upload_dashboard.single('file'), (req, res) => {
+  // This handler is executed after Multer processes the file
+  console.log('Received uniqueId:', req.body.uniqueId);  // Logs the uniqueId from form data
+  res.status(200).json({
+    message: 'File uploaded successfully',
+  });
+});
 
 // Serve static files for uploaded images
 app.use(
@@ -189,6 +211,18 @@ app.get('/xlsx_backups', (req, res) => {
 app.get('/xlsx_backups/:filename', (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, 'uploads/xlsx_backups', filename);
+
+  res.sendFile(filePath, (err) => {
+    if (err) {
+        console.error('Error sending file:', err);
+        res.status(404).send('File not found');
+    }
+  });
+});
+
+app.get('/dashboard_pdf/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, 'uploads/dashboard_pdf', filename);
 
   res.sendFile(filePath, (err) => {
     if (err) {
