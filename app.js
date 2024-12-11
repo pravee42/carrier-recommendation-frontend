@@ -94,10 +94,13 @@ app.use('/api/monitoring-effectiveness', monitoringEffectivenessRoutes);
 app.use('/api/monitoring-multi-skill', monitoringMultiSkillRoutes);
 
 // Add /update-excel route
-const filePath = path.resolve(__dirname, 'uploads/xlsx', 'latest.xlsx');
 app.post('/update-excel', (req, res) => {
-  const { editedData, sheetNames } = req.body;
-
+  const filePath = path.resolve(__dirname, 'uploads/xlsx', 'latest.xlsx');
+  console.log("Request Body:", req.body);  
+  
+  const { editedData, sheetNames } = req.body;  
+  // console.log("Received Edited Data:", editedData);
+  // console.log("Received Sheet Names:", sheetNames);   
   try {
     if (!fs.existsSync(filePath)) {
       return res.status(500).json({ error: `File does not exist at path: ${filePath}` });
@@ -120,11 +123,13 @@ app.post('/update-excel', (req, res) => {
 
         let existingData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-        editedData[key].forEach((row) => {
-          const rowIndex = existingData.findIndex((existingRow) => existingRow[1] === row.Contents);
+        editedData[key].forEach((row, index) => {
+          // console.log(Processing row ${index + 1}:, row); // Log each row being processed
+          const rowIndex = existingData.findIndex(existingRow => existingRow[2] === row.Contents); // Find by Contents column
           if (rowIndex > -1) {
             existingData[rowIndex] = [
-              '',
+              '', // SNo
+              row.Labels,
               row.Contents,
               row.Switch,
               row.Wiper,
@@ -133,6 +138,8 @@ app.post('/update-excel', (req, res) => {
               row.September, row.October, row.November, row.December,
               row.January, row.February, row.March
             ];
+          } else {
+            console.warn('Row not found for update:', row);  
           }
         });
 
@@ -142,8 +149,11 @@ app.post('/update-excel', (req, res) => {
     }
 
     XLSX.writeFile(workbook, filePath);
+    console.log("Excel file updated successfully");  
+
     res.json({ message: 'Excel file updated successfully' });
   } catch (error) {
+    console.error('Error updating Excel file:', error.message);
     res.status(500).json({ error: 'Failed to update Excel file', details: error.message });
   }
 });
