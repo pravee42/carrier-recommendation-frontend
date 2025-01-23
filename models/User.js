@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema({
   NameOfSupervisor: String,
   supervisorId: String,
   PhoneNumberOfSuperVisor: String,
+  cc_no: {type: String, default: ""},
+  shopguru: String,
+  teamleader: String,
+  sectionhead: String,
 });
 
 module.exports = mongoose.model('User', userSchema);

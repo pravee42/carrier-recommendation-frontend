@@ -6,7 +6,7 @@ const {ObjectId} = require('mongodb');
 const { request } = require('express');
 
 exports.addLevel3 = async (req, res) => {
-  const supervisor = req?.user?.id;
+  // const supervisor = req?.user?.id;
   const {userId} = req.body;
 
   try {
@@ -17,7 +17,7 @@ exports.addLevel3 = async (req, res) => {
     const result = await collection.updateOne(
       {userId},
       {
-        $set: {...req.body, supervisor},
+        $set: {...req.body},
       },
       {upsert: true},
     );
@@ -42,11 +42,10 @@ exports.getLevel3 = async (req, res) => {
     const db = client.db('test');
     const collection = db.collection('level3');
 
-    const level3 = await collection.find({userId: id}).toArray();
-    if (!level3 || level3.length === 0) {
-      return res.status(404).json({message: 'Level3 data not found'});
-    }
-    res.status(200).json({data: level3});
+    const data = await User.findOne({cc_no: id}).select('-fingerprint -userImage -DOJ -mobileNo -email -qualification -branch');
+
+    const level3 = await collection.findOne({userId: data?._id?.toString()})
+    res.status(200).json({user: data, data: level3});
   } catch (error) {
     res
       .status(500)
@@ -92,17 +91,22 @@ exports.bulkUpdateSupervisors = async (req, res) => {
 
   try {
     const updatePromises = users.map(
-      async ({userId, NameOfSupervisor, supervisorId}) => {
+      async ({userId, supervisorId, shopguru, teamleader, sectionhead}) => {
         const user = await User.findById(userId);
 
         if (user) {
-          user.NameOfSupervisor = NameOfSupervisor;
           user.supervisorId = supervisorId;
+          user.shopguru = shopguru;
+          user.teamleader = teamleader;
+          user.sectionhead = sectionhead;
 
           await user.save();
 
           // Fetch supervisor email
           const supervisor = await AdminUser.findById(supervisorId);
+          const shopguruData = await AdminUser.findById(shopguru);
+          const teamleaderDaata = await AdminUser.findById(teamleader);
+          const sectionheadData = await AdminUser.findById(sectionhead);
 
           if (supervisor && supervisor.email) {
             // Send email to the supervisor
@@ -110,6 +114,33 @@ exports.bulkUpdateSupervisors = async (req, res) => {
               supervisor.email,
               userId,
               supervisorId,
+              user.traineeName,
+            );
+          }
+          if (shopguruData && shopguruData.email) {
+            // Send email to the shopguruData
+            await sendMailToSuperVisor(
+              shopguruData.email,
+              userId,
+              shopguruData,
+              user.traineeName,
+            );
+          }
+          if (teamleaderDaata && teamleaderDaata.email) {
+            // Send email to the teamleaderDaata
+            await sendMailToSuperVisor(
+              teamleaderDaata.email,
+              userId,
+              teamleaderDaata,
+              user.traineeName,
+            );
+          }
+          if (sectionheadData && sectionheadData.email) {
+            // Send email to the sectionheadData
+            await sendMailToSuperVisor(
+              sectionheadData.email,
+              userId,
+              sectionheadData,
               user.traineeName,
             );
           }
