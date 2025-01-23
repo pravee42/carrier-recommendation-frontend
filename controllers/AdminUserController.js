@@ -58,7 +58,7 @@ const createAdminUser = async (req, res) => {
 // Controller to get all admin users
 const getAllAdminUsers = async (req, res) => {
   try {
-    const users = await AdminUser.find();
+    const users = await AdminUser.find().select("-password")
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({message: 'Error fetching users', error});

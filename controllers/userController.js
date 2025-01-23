@@ -258,4 +258,38 @@ const validateUser = async (req, res) => {
   }
 };
 
-module.exports = {createUser, validateUser};
+const getUser = async (req, res) => {
+  const {userId, cc} = req?.query
+  if(cc) {
+    try {
+      const data = await User.findOne({cc_no: cc}).select('-fingerprint');
+  
+      res.status(200).json(data);
+    } catch (error) {
+      res.status(500).json({message: error.message});
+    }
+  }
+  else {
+    if(userId) {
+      try {
+        const data = await User.findOne({_id: userId}).select('-fingerprint');
+    
+        res.status(200).json(data);
+      } catch (error) {
+        res.status(500).json({message: error.message});
+      }
+    }
+    else {
+      try {
+        const data = await User.find({}).select('-fingerprint');
+    
+        res.status(200).json(data);
+      } catch (error) {
+        res.status(500).json({message: error.message});
+      }
+    }
+  }
+}
+
+
+module.exports = {createUser, validateUser, getUser};
